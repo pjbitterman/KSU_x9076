@@ -10,27 +10,27 @@ Fall 2026 (SIS ID: 13481.202680)
 
 ## Class meetings
 
-Room: 442 McGilvrey Hall
+- Room: 442 McGilvrey Hall
 
-Meetings: Tu/Th: 12:30–1:45pm
+- Meetings: Tu/Th: 12:30–1:45pm
 
 ## Instructor
 
-Dr. Patrick Bitterman
+- Dr. Patrick Bitterman
 
-Office: 436 McGilvrey Hall
+- Office: 436 McGilvrey Hall
 
-Email: <pbitterm@kent.edu>
+- Email: <pbitterm@kent.edu>
 
-Office hours: Tuesday and Thursday, 10:30am–12:00pm
+- Office hours: Tuesday and Thursday, 10:30am–12:00pm
 
 ## Department Chair
 
-Dr. Sarah Smiley
+- Dr. Sarah Smiley
 
-Office: 413D McGilvrey Hall
+- Office: 413D McGilvrey Hall
 
-Email: <ssmiley8@kent.edu>
+- Email: <ssmiley8@kent.edu>
 
 ---
 
