@@ -1,26 +1,35 @@
 # Spatial Programming (GEOG 49076 / 59076 / 79076)
 
 Kent State University
+
 College of Sciences and Humanities
+
 Department of Geography
+
 Fall 2026 (SIS ID: 13481.202680)
 
 ## Class meetings
 
 Room: 442 McGilvrey Hall
+
 Meetings: Tu/Th: 12:30–1:45pm
 
 ## Instructor
 
-Dr. Patrick Bitterman — pbitterm@kent.edu
+Dr. Patrick Bitterman
+
 Office: 436 McGilvrey Hall
+
 Email: <pbitterm@kent.edu>
+
 Office hours: Tuesday and Thursday, 10:30am–12:00pm
 
 ## Department Chair
 
 Dr. Sarah Smiley
+
 Office: 413D McGilvrey Hall
+
 Email: <ssmiley8@kent.edu>
 
 ---

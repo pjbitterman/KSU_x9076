@@ -39,19 +39,20 @@ By the end of the term, students will be able to successfully:
 .
 ├── README.md
 ├── LICENSE                 # MIT (code) — see License section below
-├── environment.yml         # open-source environment (Weeks 9–16)
+├── environment.yml         # open-source environment 
 ├── weeks/                  # one folder per week: notebooks, scripts, slides
 │   ├── week01/
 │   ├── week02/
 │   └── ...
 ├── data/                   # sample datasets (small; large data linked, not committed)
 ├── assignments/            # weekly exercises and project briefs
+├── syllabus/               # course syllabus
 └── resources/              # cheat sheets, references, setup guides
 ```
 
 ## A note on how to work in this course
 
-Programming is learned by struggling with it, not by watching someone write the code. Type the
+Programming is learned by working through problems, not by watching someone write the code. Type the
 code yourself rather than copying and pasting. When something breaks (and it will) read
 the error message before doing anything else - learning to interpret errors is a skill you should develop. Get things working on your own first; then use documentation, classmates, office
 hours, and, later in the term, AI assistants as tools to extend what you can do rather than
