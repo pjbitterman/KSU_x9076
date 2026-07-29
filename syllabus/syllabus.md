@@ -217,11 +217,12 @@ The Administrative Policy regarding student cheating and plagiarism (3-01.8)has 
 I expect all people in this academic space will be respectful. If a person is disruptive, I will enforce university policy.
 
 Examples of disruptive behavior may include but are not limited to:
-•	Monopolizing class time with excessive comments or questions
-•	Interrupting class sessions or assignments
-•	Abusing faculty office hours
-•	Repeatedly speaking in an elevated or angry/aggressive tone
-•	Attacking the beliefs or conclusions others draw in class.
+
+- Monopolizing class time with excessive comments or questions
+- Interrupting class sessions or assignments
+- Abusing faculty office hours
+- Repeatedly speaking in an elevated or angry/aggressive tone
+- Attacking the beliefs or conclusions others draw in class.
 
 Please see KSU policy 4-02.2 and process for disruptive students, which include referral to the Office of Student Conduct as I deem necessary.
 
