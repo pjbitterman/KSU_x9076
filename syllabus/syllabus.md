@@ -131,7 +131,7 @@ This course is offered at three levels: GEOG 49076 (undergraduate), GEOG 59076 (
 - **Memo 2 — Data audit + methods critique**, due with Lab 5: audit a dataset relevant to your research, and critique the methods of a published study that tackled a similar spatial programming problem
 - **Memo 3 — ESDA pilot + notebook**, due with Lab 8: a small exploratory spatial data analysis pilot on your own data, including an extended interpretation section — situating the analysis in relevant literature and critically evaluating methodological choices, limitations, and possible extensions
 
-Each memo is **1–2 pages** and is graded as a **10-point "graduate component"** criterion inside that lab's graduate rubric variant. 
+Each memo is **1–2 pages** and is graded as a **10-point "graduate component"** criterion inside that lab's graduate rubric variant.
 
 **If you do not yet have a defined research topic** (e.g., you're early in a program, or between projects), use a data or automation question from your home program that you are genuinely considering. Memos are meant to make the course's skills useful to your own work, not to require a finished thesis question.
 
@@ -231,6 +231,7 @@ Only students who have been formally admitted to Kent State University may regis
 
 ### Kent Campus Academic Support Statement
 Kent State recognizes many students face challenges and we are committed to supporting your academic journey when you need help.  Please check out these resources to help as you build your support system:
+
 - What is the first step I should take to get academic support for this class?
     - Reach out to your instructor!
 - Where can I get help from another student who earned a good grade in this class?
