@@ -4,7 +4,7 @@ Spatial Programming (GEOG 49076 / 59076 / 79076)
 
 There is some irony of teaching a modern spatial *programming* course and placing limits on the use of AI coding tools, as that is how much professional code now gets written. But using those tools well requires exactly kinds of skills this course exists to build - reading, writing, and reasoning about code yourself. Simply put, you are unable to verify, test, or catch the errors in generated code you couldn't have written. If a model writes code *for* you before you can read it, you leave this course without learning much. That said, coding with AI assistants (and assistance) is here to stay, and I would be doing your careers a disservice not to acknowledge that fact. Accordingly, we will discuss the use of these tools later in semester, after we have covered the fundamentals - especially the spatial ones.
 
-**TL;DR version: AI tools do not write your code (or your prose) in this course, unless an assignment expressly says otherwise. Any permitted use must be disclosed, justified, and explainable. Practicum days are fully unplugged. When you're not sure, ask first.**
+**TL;DR version: AI tools do not write your code (or your prose) in this course, unless an assignment expressly says otherwise. Any permitted use must be disclosed, justified, and explainable. When you're not sure, ask first.**
 
 ---
 
