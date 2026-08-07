@@ -1,11 +1,9 @@
 # KSU_x9076: Spatial Programming
 
 **GEOG 4/5/7 9076 · Kent State University**
-**Instructor:** Patrick Bitterman · [pbitterm@kent.edu]
+**Instructor:** Patrick Bitterman · <pbitterm@kent.edu>
 
-An introduction to programming and programmatic thinking for geographers. The course teaches Python as a tool for spatial analysis, moving from automating tasks inside ArcGIS Pro to building
-reproducible workflows with the open-source geospatial stack. No prior programming
-experience is required or assumed.
+An introduction to programming and programmatic thinking for geographers and the spatially-interested. The course teaches Python as a tool for spatial analysis, ranging from automating tasks inside ArcGIS Pro to building reproducible workflows with the open-source geospatial stack. No prior programming experience is required or assumed.
 
 ---
 
@@ -44,7 +42,7 @@ By the end of the term, students will be able to successfully:
 │   ├── week01/
 │   ├── week02/
 │   └── ...
-├── data/                   # sample datasets (small; large data linked, not committed)
+├── data/                   # sample datasets 
 ├── assignments/            # weekly exercises and project briefs
 ├── syllabus/               # course syllabus
 └── resources/              # cheat sheets, references, setup guides
