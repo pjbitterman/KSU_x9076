@@ -53,7 +53,7 @@ By the end of the term, you will be able to:
 3. Analyze workflows and describe code and algorithms in plain language, including reading and adapting scripts someone else wrote
 4. Design and build small, reusable programs and tools (e.g., functions, script tools, toolboxes) that interface with GIS software
 5. Conduct and respond to code review: give specific, professional feedback on a peer's code, and revise your own work in response to feedback you receive
-6. Use AI coding assistants critically — treat generated code as a draft to verify, test, and understand, not a finished answer you submit unread
+6. Use AI coding assistants critically: treat generated code as a draft to verify, test, and understand
 7. Plan, develop, and execute an independent programmatic analysis of a dataset, and communicate the results clearly
 
 ## Materials
