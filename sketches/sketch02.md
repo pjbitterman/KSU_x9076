@@ -8,7 +8,7 @@ Not all spatial data formats behave the same way. This sketch has you convert on
 
 ## Task
 
-Starting from the shapefile provided in this week's Canvas module:
+Starting from any shapefile provided in the course's GitHub repository:
 
 1. Convert it to a **GeoPackage** feature class
 2. Convert it to **GeoParquet** (note, you need at least ArcGIS Pro 3.6)
@@ -17,7 +17,7 @@ You can do the GeoPackage conversion with the Export Features tool (GUI or `arcp
 
 Then build a short comparison table with (at least) these four rows:
 
-| | Shapefile | GeoPackage | GeoParquet |
+| Feature | Shapefile | GeoPackage | GeoParquet |
 |---|---|---|---|
 | File size | | | |
 | Longest field name allowed | | | |
