@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lab 1: Python Fundamentals and Your First Automation</title>
+<title>Lab 2: Batch Geoprocessing and Data Interrogation</title>
 <style>
 
 span.smallcaps{font-variant: small-caps;}
@@ -2206,12 +2206,12 @@ vertical-align: -.125em;
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lab01.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lab02.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lab 1: Python Fundamentals and Your First Automation</h1>
+<h1 class="title">Lab 2: Batch Geoprocessing and Data Interrogation</h1>
 </div>
 
 
@@ -2228,155 +2228,113 @@ vertical-align: -.125em;
 </header>
 
 
-<p><strong>Points:</strong> 75</p>
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>This lab has two parts. Part 1 is pure Python (no <code>arcpy</code>) working with a plain CSV file. Part 2 is geoprocessing: you’ll run the same workflow three ways, the way we did with Buffer in week 2.</p>
-<p>Download the template notebook, <code>lab01_template.ipynb</code>, before you start. It has one markdown header and one seeded code cell per task below. Complete all of your work inside it, in order, and submit the completed file. Read the whole lab before you start. Remember, later steps build on earlier ones, and it’s easier to plan your notebook if you know where it’s headed.</p>
-<p><strong>Data:</strong> <code>ohio_precip_2025.csv</code> and <code>ohio_counties.shp</code> are in the course GitHub repository. <code>ohio_precip_2025.csv</code> has one row per weather station, with columns <code>station_id</code>, <code>name</code>, <code>lat</code>, <code>lon</code>, and <code>precip_mm_2025</code> (total precipitation recorded at that station in 2025, in millimeters).</p>
-<hr>
-</section>
-<section id="part-1-python-fundamentals-35-points" class="level2">
-<h2 class="anchored" data-anchor-id="part-1-python-fundamentals-35-points">Part 1: Python Fundamentals (35 points)</h2>
-<p>Everything here is plain Python, working directly with the CSV file. In your template notebook, this is the <code>## Part 1</code> section — keep your work below its heading.</p>
-<section id="reading-the-csv" class="level3">
-<h3 class="anchored" data-anchor-id="reading-the-csv">Reading the CSV</h3>
-<p>We haven’t covered file reading in class yet, so below is an example to get you started. <code>csv.DictReader</code> turns each row of a CSV into a dictionary keyed by column name, so you don’t have to track column positions by hand:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> csv</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> <span class="bu">open</span>(<span class="st">&quot;ohio_precip_2025.csv&quot;</span>) <span class="im">as</span> f:</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    reader <span class="op">=</span> csv.DictReader(f)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">for</span> row <span class="kw">in</span> reader:</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(row[<span class="st">&quot;station_id&quot;</span>], row[<span class="st">&quot;precip_mm_2025&quot;</span>])</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        <span class="cf">break</span>  <span class="co"># just look at the first row for now</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Important:</strong> Save your notebook in the same folder as the CSV file so Python can find it. The plain <code>open()</code> function looks for files relative to where your notebook is saved, but it does <em>not</em> look in the <code>arcpy.env.workspace</code> folder. If you get a <code>FileNotFoundError</code> when you run this, use the full path: <code>open(&quot;C:/YOURPATHHERE/ohio_precip_2025.csv&quot;)</code> instead.</p>
-<p>Run the above code, then look at what one <code>row</code> actually contains, and remove the <code>break</code> command once you understand the how the data are structured.</p>
-<p>Two things to notice: every value in <code>row</code> comes back as a <strong>string</strong>, even <code>precip_mm_2025</code>, so you’ll need to convert it with <code>float()</code> before doing any math with it; and <code>with open(...) as f:</code> closes the file for you automatically once the indented block finishes.</p>
-</section>
-<section id="task-1.1-count-min-max-mean-7-points" class="level3">
-<h3 class="anchored" data-anchor-id="task-1.1-count-min-max-mean-7-points">Task 1.1: Count, min, max, mean (7 points)</h3>
-<p>Using the pattern above, you will read every row of <code>ohio_precip_2025.csv</code> and compute, for <code>precip_mm_2025</code>:</p>
+<p>Over the last few weeks, we have introduced:</p>
+<ol type="1">
+<li><strong>batch processing</strong>, which allows us to write one tool call, then loop it over everything in a workspace instead of running it by hand</li>
+<li><strong>interrogation</strong>, where we never trust a file’s shape, coordinate system, or fields until you’ve used <code>Describe</code> or <code>ListFields</code> directly.</li>
+</ol>
+<p>This lab has three tasks. Task A builds an inventory of a workspace. Task B batch-buffers everything inside the workspace. In Task C, you will answer factual questions about the data <strong><em>programmatically</em></strong>.</p>
+<p>Download the template notebook, <code>lab02_template.ipynb</code>, before you start. It has one markdown header and one seeded code cell per task below, in order — Task B assumes Task A’s workspace setup, and Task C requires both, so do your work inside the template in order and submit the completed file.</p>
+<p><strong>Data:</strong> All are present in the course repostory. The data you’ll need are:</p>
 <ul>
-<li>the number of stations,</li>
-<li>the minimum value,</li>
-<li>the maximum value,</li>
-<li>the mean (average) value.</li>
+<li><code>ohio_counties.shp</code></li>
+<li><code>portage_munis.shp</code></li>
+<li><code>ohio_state_parks.shp</code>- -<code>streams_portage.geojson</code> file</li>
+<li>ohio_precip_2025.csv`, all sitting directly in that folder</li>
 </ul>
-<p><strong>Do not hardcode any of these numbers.</strong> Your code has to compute them from the file’s contents, not from a value you looked up, computed in Excel, or typed in — if the data were to change, your code should still give the right answer without you touching it. Print all four values with a label so it’s clear what each one is.</p>
-<p>Let’s work through it in three guided steps:</p>
-<ol type="1">
-<li><strong>Before the loop:</strong> we need to create accumulator variables: a running count, a running total, a running minimum, and a running maximum. Think about what each one’s starting value should be so the first row updates it correctly.</li>
-<li><strong>Inside the loop:</strong> for each row, convert <code>precip_mm_2025</code> to <code>float</code>, then update every accumulator: add 1 to the count, add the value to the running total, and compare against the running min/max.</li>
-<li><strong>After the loop:</strong> compute the mean from your running total and count, and print all four values with clear labels.</li>
-</ol>
-<details>
-<summary>
-Hint: the accumulator pattern
-</summary>
-<p>An “accumulator” is just a variable you create before a loop starts and update on every iteration. The running count and running total above are both accumulators. The general shape:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>count <span class="op">=</span> <span class="dv">0</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>total <span class="op">=</span> <span class="fl">0.0</span></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> reader:</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="bu">float</span>(row[<span class="st">&quot;precip_mm_2025&quot;</span>])</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    count <span class="op">=</span> count <span class="op">+</span><span class="dv">1</span></span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    total <span class="op">=</span> total <span class="op">+</span> value</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>mean <span class="op">=</span> total <span class="op">/</span> count</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-Min and max follow the same pattern, but instead of always adding, you only update when the new value beats the current best-so-far. Ask yourself: what should <code>running_min</code> start at, before you’ve seen any real data, so that the very first row is guaranteed to replace it?
-</details>
-<p><strong>Expected output looks like:</strong> four printed lines, each with a label and a number — something in the shape of <code>Station count: &lt;int&gt;</code>, <code>Min precip_mm_2025: &lt;float&gt; mm</code>, <code>Max precip_mm_2025: &lt;float&gt; mm</code>, <code>Mean precip_mm_2025: &lt;float&gt; mm</code>. (Note, this hint shows you the format, not the values — you’ll compute those from the data yourself.)</p>
-</section>
-<section id="task-1.2-stations-above-the-mean-7-points" class="level3">
-<h3 class="anchored" data-anchor-id="task-1.2-stations-above-the-mean-7-points">Task 1.2: Stations above the mean (7 points)</h3>
-<p>Using the mean you just computed, find every station whose <code>precip_mm_2025</code> is above the mean. Print how many stations that is, and print the name and value for the first five of them.</p>
-<p>Guided steps:</p>
-<ol type="1">
-<li><strong>Reuse, don’t recompute.</strong> Use the <code>mean</code> variable from Task 1.1 — don’t write a second pass that recalculates a mean independently</li>
-<li><strong>Filter:</strong> loop over the rows again (or over a list you saved while reading them the first time) and collect the ones whose <code>precip_mm_2025</code> is above the mean</li>
-<li><strong>Report:</strong> print the count of matches, then print name + value for the first five</li>
-</ol>
-<details>
-<summary>
-Hint: the above-mean filter
-</summary>
-<p>You need the raw rows a second time, so either re-open and re-read the CSV, or save each row (or just the fields you need) into a list the first time through, in Task 1.1. Either approach is fine — the design of the filtering step looks like:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>above_mean <span class="op">=</span> []</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> row <span class="kw">in</span> rows:</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>    value <span class="op">=</span> <span class="bu">float</span>(row[<span class="st">&quot;precip_mm_2025&quot;</span>])</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> value <span class="op">&gt;</span> mean:</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>        above_mean.append(row)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-Then <code>len(above_mean)</code> is your count, and <code>above_mean[:5]</code> gets you the first five to print.
-</details>
-<p><strong>Expected output looks like:</strong> one line such as <code>&lt;int&gt; stations above the mean</code>, followed by up to five lines, each showing a station name and its value — e.g. <code>&lt;name&gt;: &lt;float&gt; mm</code>.</p>
-</section>
-<section id="task-1.3-a-conversion-function-21-points" class="level3">
-<h3 class="anchored" data-anchor-id="task-1.3-a-conversion-function-21-points">Task 1.3: A conversion function (21 points)</h3>
-<p>Precipitation totals are more familiar to a lot of students in inches than millimeters. We haven’t covered writing your own functions yet (that comes later), but here’s the shape of one — copy this pattern:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> function_name(parameter):</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> parameter <span class="op">*</span> <span class="dv">2</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>A function definition starts with <code>def</code>, a name, and a parenthesized parameter list, followed by a colon. The indented body runs each time the function is called, and <code>return</code> hands a value back to whoever called it.</p>
-<p>Following that pattern, write a function called <code>mm_to_inches(mm)</code> that converts a value in millimeters to inches (1 inch = 25.4 mm). Give it a one-line <strong>docstring</strong> — a quoted string right under the <code>def</code> line describing what the function does — and use it inside an f-string to print a one-line report, along the lines of:</p>
-<p><code>f&quot;The mean station total was {mean_precip:.1f} mm ({mm_to_inches(mean_precip):.2f} in).&quot;</code></p>
-<p>Use <code>mm_to_inches</code> at least once more somewhere else in your Part 1 output (for example, converting the min or max value too).</p>
-<details>
-<summary>
-Hint: writing the function definition
-</summary>
-<p>Filling in the pattern above with a docstring looks like this shape (the conversion logic is yours to write):</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> mm_to_inches(mm):</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="co">&quot;&quot;&quot;One-line description of what this function does.&quot;&quot;&quot;</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> ...  <span class="co"># your conversion here</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-Call it the same way you’d call any built-in function, <code>mm_to_inches(some_value)</code>, anywhere you’d otherwise write out the conversion math by hand — including inside an f-string’s <code>{}</code>.
-</details>
-<p><strong>Expected output looks like:</strong> at least two printed report lines, each a sentence that names a millimeter value and its inches equivalent in parentheses — e.g. <code>&quot;...was &lt;float&gt; mm (&lt;float&gt; in).&quot;</code> — using two different input values.</p>
 <hr>
 </section>
+<section id="warm-up-one-row-by-hand" class="level2">
+<h2 class="anchored" data-anchor-id="warm-up-one-row-by-hand">Warm-up: one row by hand</h2>
+<p>Before you write a loop that performs the following work for every feature class, investigate what the loop body needs to produce for a single one. Here’s an example of it for <code>ohio_counties.shp</code>, worked by hand:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fc <span class="op">=</span> <span class="st">&quot;ohio_counties.shp&quot;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>desc <span class="op">=</span> arcpy.da.Describe(fc)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>shape_type <span class="op">=</span> desc[<span class="st">&quot;shapeType&quot;</span>]</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>crs_name <span class="op">=</span> desc[<span class="st">&quot;spatialReference&quot;</span>].name</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>count_result <span class="op">=</span> arcpy.management.GetCount(fc)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>feature_count <span class="op">=</span> <span class="bu">int</span>(count_result[<span class="dv">0</span>])</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>fc<span class="sc">:&lt;22}</span><span class="ss"> </span><span class="sc">{</span>shape_type<span class="sc">:&lt;10}</span><span class="ss"> </span><span class="sc">{</span>crs_name<span class="sc">:&lt;28}</span><span class="ss"> </span><span class="sc">{</span>feature_count<span class="sc">}</span><span class="ss"> features&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The single <code>print</code> line is one row of Task A’s table. For Task A, you’ll need a loop that walks every feature class <code>arcpy.ListFeatureClasses()</code> finds. Therefore, the same four lines above (<code>desc</code>, <code>shape_type</code>, <code>crs_name</code>, <code>feature_count</code>) will become the body of that loop.</p>
+<hr>
 </section>
-<section id="part-2-one-tool-three-ways-buffer-and-summarize-28-points" class="level2">
-<h2 class="anchored" data-anchor-id="part-2-one-tool-three-ways-buffer-and-summarize-28-points">Part 2: One Tool, Three Ways — Buffer and Summarize (28 points)</h2>
-<p>In week 2 you ran Buffer on the state parks layer three ways: the GUI dialog, ModelBuilder, and <code>arcpy</code>. This time you’re running a small two-step workflow (<strong>Buffer, then a spatial summary</strong>) on <code>ohio_counties.shp</code>, and you only need to build it two of the three ways.</p>
-<p>The workflow: buffer every county in <code>ohio_counties.shp</code> by a distance of your choosing (pick something between 1 and 10 miles and state what you picked), keeping each county’s buffer as a separate feature (don’t dissolve). Then summarize <code>ohio_state_parks.shp</code> within those buffers — you’re looking for a tool that counts, for each buffered county, how many state parks fall inside it. Look for a summarizing tool in the Analysis toolbox alongside Buffer; its dialog and its “Learn more” reference page will tell you what its inputs are.</p>
-<section id="task-2.1-modelbuilder-16-points" class="level3">
-<h3 class="anchored" data-anchor-id="task-2.1-modelbuilder-16-points">Task 2.1: ModelBuilder (16 points)</h3>
-<p>Build this two-step workflow — Buffer, then the summary tool, chained so the output of Buffer feeds the input of the summary step — in ModelBuilder. Follow this click path:</p>
-<ol type="1">
-<li>Open ModelBuilder: <strong>Analysis</strong> tab → <strong>ModelBuilder</strong>, or right-click a toolbox in the Catalog pane → <strong>New</strong> → <strong>Model</strong>.</li>
-<li>Drag <code>ohio_counties.shp</code> from the Catalog pane onto the model canvas as your first input.</li>
-<li>Search “buffer” in the model’s tool search box, drag <strong>Buffer</strong> onto the canvas, and connect <code>ohio_counties.shp</code> into it as the input feature.</li>
-<li>Double-click the Buffer box to open its parameter dialog <em>inside the model</em> — set your chosen distance (1–10 miles) and leave dissolve unset (<code>NONE</code>), so every county keeps its own buffer feature.</li>
-<li>Search for the summarizing tool you identified above (in the Analysis toolbox, near Buffer), drag it onto the canvas.</li>
-<li>Connect Buffer’s output into the summarize tool as its input polygons, and set <code>ohio_state_parks.shp</code> as the layer being summarized — this is the connection that makes the workflow “chained” rather than two separate runs.</li>
-<li>Run the model (<strong>Run</strong> button, or <strong>Model</strong> menu → <strong>Run Entire Model</strong>).</li>
-<li>Add the result to your map if it isn’t added automatically.</li>
-</ol>
-<p><strong>Expected result:</strong> a model canvas with two tool boxes, both fully colored (not white/unset), connected by an arrow running from Buffer’s output into the summarize tool’s input. You should NOT have disconnected boxes sitting side by side.</p>
-<p>Deliverables:</p>
+<section id="task-a-inventory-script-22-points" class="level2">
+<h2 class="anchored" data-anchor-id="task-a-inventory-script-22-points">Task A: Inventory script (22 points)</h2>
+<p>Set <code>arcpy.env.workspace</code> to a sensible location and set <code>arcpy.env.overwriteOutput = True</code>.</p>
+<p>Use <code>arcpy.ListFeatureClasses()</code> to return every feature class arcpy can see in that workspace. Loop over the result and, for each feature class, print one row of a table with these four columns:</p>
 <ul>
-<li>A screenshot of the finished model (both tool boxes, connected, filled in).</li>
-<li>A screenshot showing the resulting output layer added to your map.</li>
+<li><strong>name</strong> — the feature class’s filename,</li>
+<li><strong>shapeType</strong> — from <code>Describe</code>,</li>
+<li><strong>CRS name</strong> — the coordinate reference system’s name, also from <code>Describe</code>,</li>
+<li><strong>feature count</strong> — the number of features it contains.</li>
 </ul>
-</section>
-<section id="task-2.2-arcpy-12-points" class="level3">
-<h3 class="anchored" data-anchor-id="task-2.2-arcpy-12-points">Task 2.2: arcpy (12 points)</h3>
-<p>Write the same two-step workflow as <code>arcpy</code> calls in your notebook, though you can write the output as a shapefile instead of to a geodatabase (though that’s ok too).</p>
-<p>Set your workspace first. <strong>Your solution should take about 10 lines of code or fewer</strong>, not counting blank lines. It’s ok if you have more than that. Print <code>arcpy.GetMessages()</code> after the summary step so there’s a record of it running cleanly.</p>
-<p><strong>Expected output:</strong> a short block of <code>arcpy</code> status text (whatever <code>GetMessages()</code> returns) with no traceback — if you see a red error block instead, something upstream didn’t run.</p>
-</section>
-<section id="task-2.3-prose" class="level3">
-<h3 class="anchored" data-anchor-id="task-2.3-prose">Task 2.3: Prose</h3>
-<p>In a markdown cell, in 3–5 sentences: for this specific two-step workflow, when would you use the GUI dialog, when ModelBuilder, and when <code>arcpy</code>? Ground your answer in this task, not just the general tradeoffs from week 2 — is this a workflow you’d run once, hand to someone else, or automate and repeat?</p>
+<p>You already know how to pull <code>shapeType</code> and a CRS name out of <code>arcpy.da.Describe()</code> from week 4 (refer to our in-class notebooks if you need help).</p>
+<p>Feature count is new. <code>arcpy.management.GetCount()</code> takes a feature class and returns a <code>Result</code> object (not a plain number) so wrap it in <code>int(...)</code> to get something you can print, store, or compare. For example…</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>count_result <span class="op">=</span> arcpy.management.GetCount(<span class="st">&quot;ohio_counties.shp&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>feature_count <span class="op">=</span> <span class="bu">int</span>(count_result[<span class="dv">0</span>])</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(feature_count)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Put those pieces together inside your loop over <code>ListFeatureClasses()</code>, and print one aligned row per feature class. In this case, use an f-string with <code>:&lt;</code> width specifiers:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>fc<span class="sc">:&lt;22}</span><span class="ss"> </span><span class="sc">{</span>shape_type<span class="sc">:&lt;10}</span><span class="ss"> </span><span class="sc">{</span>crs_name<span class="sc">:&lt;28}</span><span class="ss"> </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss"> features&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p><strong>Do not hardcode the feature class names, shape types, or counts.</strong> Your loop must discover everything from the workspace itself. If a file were added to or removed from the folder, your code should print a correspondingly different table without you touching it.</p>
+<p><strong>Expected output looks like:</strong> one aligned row per feature class arcpy finds in the workspace (three rows for this dataset) each row showing a filename, a shape type word, a CRS name, and a feature count, in that order.</p>
 <hr>
 </section>
+<section id="task-b-batch-buffer-30-points" class="level2">
+<h2 class="anchored" data-anchor-id="task-b-batch-buffer-30-points">Task B: Batch buffer (30 points)</h2>
+<p>Buffer <strong>every polygon feature class</strong> in the workspace at <strong>two different distances of your choosing</strong>. Pick two values that make sense for these data and say what you picked and why, in one sentence, in a markdown cell.</p>
+<p>Reuse the derived-output-name pattern from our in-class work: strip the input’s extension, and build the output name with an f-string that incorporates the distance, (e.g. something in the shape of <code>f&quot;{base_name}_{distance_label}.shp&quot;</code>). You’ll need to use a nested loop — one loop over your two distances, one loop over the feature classes — so that every feature class gets buffered at both distances (six output files total, from three feature classes and two distances).</p>
+<details>
+<summary>
+Hint: the derived-name pattern
+</summary>
+<p>“Derived” means the output name is <em>built from</em> the input’s name and the current distance, not typed once per file. A possible shape to follow:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>base_name <span class="op">=</span> fc.replace(<span class="st">&quot;.shp&quot;</span>, <span class="st">&quot;&quot;</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>out_name <span class="op">=</span> <span class="ss">f&quot;</span><span class="sc">{</span>base_name<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>distance<span class="sc">}</span><span class="ss">mi.shp&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+<p>Use two checks to “guard” the execusion in two ways:</p>
+<ul>
+<li><strong><code>arcpy.env.overwriteOutput = True</code></strong></li>
+<li><strong><code>arcpy.Exists()</code></strong>, checked before each <code>Buffer</code> call, so a re-run <em>skips</em> work that’s already done instead of silently redoing it. Print a <code>&quot;skipping ... -- already exists&quot;</code> line when this happens, same as the pattern in-class.</li>
+</ul>
+<details>
+<summary>
+Hint: the Exists guard
+</summary>
+<p>Check <em>before</em> you call <code>Buffer</code>, not after. After all, the point is to skip the call entirely, not to run it and then notice:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> arcpy.Exists(out_name):</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;skipping </span><span class="sc">{</span>out_name<span class="sc">}</span><span class="ss"> -- already exists&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    arcpy.analysis.Buffer(fc, out_name, <span class="ss">f&quot;</span><span class="sc">{</span>distance<span class="sc">}</span><span class="ss"> Miles&quot;</span>, dissolve_option<span class="op">=</span><span class="st">&quot;NONE&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+This has to sit <em>inside</em> both loops, immediately before the <code>Buffer</code> call, so it’s checked for every one of the six planned outputs.
+</details>
+<p>Leave the dissolve option unset (or explicitly <code>&quot;NONE&quot;</code>) — you want one buffer polygon per input feature, not one merged shape per feature class.</p>
+<p>After each successful buffer, print a one-line confirmation using <code>GetCount</code> on both the input and the output. For a non-dissolved buffer, those two counts should always match. If they don’t, something is wrong with your dissolve setting.</p>
+<p><strong>Expected output looks like:</strong> up to six confirmation lines (fewer on a re-run, replaced by “skipping…” lines), each naming an output file and showing two feature counts that match. Also, somewhere before or after the loop, one markdown sentence naming your two chosen distances and why.</p>
+<hr>
+</section>
+<section id="task-c-interrogation-memo-19-points" class="level2">
+<h2 class="anchored" data-anchor-id="task-c-interrogation-memo-19-points">Task C: Interrogation memo (19 points)</h2>
+<p>Answer each of the five questions below with a code cell (the code, not you, should determine the answer) and then write a short markdown memo cell (3–5 sentences) underneath, summarizing what you found across all five <strong><em>in your own words</em></strong>.</p>
+<ol type="1">
+<li>Which of the three feature classes has the most features, and how many does it have?</li>
+<li>Which feature classes share a coordinate reference system, and which one differs? Name the CRS(s) involved.</li>
+<li>Counting every field <code>arcpy.ListFields()</code> returns for each feature class (including the fields arcpy adds automatically, like <code>FID</code> and <code>Shape</code>), which feature class has the most total fields, and which has the fewest?</li>
+<li>Is <code>streams_portage.geojson</code> included in the list <code>arcpy.ListFeatureClasses()</code> returns from this workspace? Confirm your answer with code (don’t just guess) and explain, in one sentence, why it does or doesn’t show up there.</li>
+<li>Do all three feature classes have a field named exactly <code>NAME</code> (all uppercase)? Confirm with code; if one of them doesn’t, state which one, and what its actual field name is instead.</li>
+</ol>
+<p>Every one of the above questions is answerable with tools you already have: <code>ListFeatureClasses</code>, <code>Describe</code>, <code>ListFields</code>, <code>GetCount</code>, and a loop (or two). None require reading individual attribute <em>values</em> row by row.</p>
+<p>Reuse your Task A inventory loop where it helps. For example, question 1, is nearly a one-line extension of it.</p>
+<p><strong>Expected output looks like:</strong> five short code-cell answers (a printed sentence or value per question is enough — no fixed format required) plus one memo paragraph underneath, 3–5 sentences, that reads as a summary rather than five restated answers in a row.</p>
+<hr>
 </section>
 <section id="deliverables-and-submission" class="level2">
 <h2 class="anchored" data-anchor-id="deliverables-and-submission">Deliverables and submission</h2>
 <p>Submit through Canvas:</p>
 <ol type="1">
-<li>Your completed template notebook (<code>lab01_template.ipynb</code>), containing all of Part 1’s code and output, Part 2’s <code>arcpy</code> code and its printed messages, and your Task 2.3 prose. It should all be in one file, runnable top to bottom.</li>
-<li>The two ModelBuilder screenshots from Task 2.1.</li>
+<li>Your completed template notebook (<code>lab02_template.ipynb</code>), containing Task A’s inventory table and its printed output, Task B’s batch-buffer code and its confirmation lines, and Task C’s five code-and-answer pairs plus your memo paragraph. The must all in one file, runnable top to bottom.</li>
 </ol>
-<p><strong>Submit code as code, not screenshots of code.</strong> A screenshot of a code cell can’t be run, copied, or checked. Write and run your actual code in the notebook. Screenshots are for the ModelBuilder model and the map view only</p>
 </section>
 <section id="point-breakdown" class="level2">
 <h2 class="anchored" data-anchor-id="point-breakdown">Point breakdown</h2>
@@ -2389,16 +2347,16 @@ Call it the same way you’d call any built-in function, <code>mm_to_inches(some
 </thead>
 <tbody>
 <tr class="odd">
-<td>Part 1: Python fundamentals</td>
-<td>35</td>
+<td>Task A: Inventory script</td>
+<td>22</td>
 </tr>
 <tr class="even">
-<td>Part 2: Buffer + summarize</td>
-<td>28</td>
+<td>Task B: Batch buffer</td>
+<td>30</td>
 </tr>
 <tr class="odd">
-<td>Prose (Task 2.3)</td>
-<td>8</td>
+<td>Task C: Interrogation memo</td>
+<td>19</td>
 </tr>
 <tr class="even">
 <td>Style and naming</td>
@@ -2410,7 +2368,8 @@ Call it the same way you’d call any built-in function, <code>mm_to_inches(some
 </tr>
 </tbody>
 </table>
-<p>“Style and naming” covers <code>snake_case</code> variable and function names, readable f-strings instead of manual string concatenation, and a docstring on <code>mm_to_inches</code> — the same conventions from weeks 1 and 2.</p>
+<p>“Style and naming” covers <code>snake_case</code> variable names, f-strings for all formatted output, and derived (not hand-typed) output names in Task B.</p>
+<p>Late work follows the course late policy.</p>
 </section>
 
 </main>

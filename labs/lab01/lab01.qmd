@@ -173,13 +173,15 @@ Deliverables:
 
 ### Task 2.2: arcpy (12 points)
 
-Write the same two-step workflow as `arcpy` calls in your notebook. Set your workspace first. **Your solution should take about 10 lines of code or fewer**, not counting blank lines. It's ok if you have more than that. Print `arcpy.GetMessages()` after the summary step so there's a record of it running cleanly.
+Write the same two-step workflow as `arcpy` calls in your notebook, though you can write the output as a shapefile instead of to a geodatabase (though that's ok too).
+
+Set your workspace first. **Your solution should take about 10 lines of code or fewer**, not counting blank lines. It's ok if you have more than that. Print `arcpy.GetMessages()` after the summary step so there's a record of it running cleanly.
 
 **Expected output:** a short block of `arcpy` status text (whatever `GetMessages()` returns) with no traceback — if you see a red error block instead, something upstream didn't run.
 
 ### Task 2.3: Prose
 
-In a markdown cell, in 3–5 sentences: for this specific two-step workflow, when would you use the GUI dialog, when  ModelBuilder, and when `arcpy`? Ground your answer in this task, not just the general tradeoffs from week 2 — is this a workflow you'd run once, hand to someone else, or automate and repeat? (
+In a markdown cell, in 3–5 sentences: for this specific two-step workflow, when would you use the GUI dialog, when  ModelBuilder, and when `arcpy`? Ground your answer in this task, not just the general tradeoffs from week 2 — is this a workflow you'd run once, hand to someone else, or automate and repeat?
 
 ---
 
