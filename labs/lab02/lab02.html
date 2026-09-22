@@ -2248,7 +2248,7 @@ vertical-align: -.125em;
 </section>
 <section id="warm-up-one-row-by-hand" class="level2">
 <h2 class="anchored" data-anchor-id="warm-up-one-row-by-hand">Warm-up: one row by hand</h2>
-<p>Before you write a loop that performs the following work for every feature class, investigate what the loop body needs to produce for a single one. Here’s an example of it for <code>ohio_counties.shp</code>, worked by hand:</p>
+<p>Before you write a loop that performs the following work for every feature class, investigate what the loop body needs to produce for a single one. Here’s an example of it for <code>ohio_counties.shp</code>:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fc <span class="op">=</span> <span class="st">&quot;ohio_counties.shp&quot;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>desc <span class="op">=</span> arcpy.da.Describe(fc)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>shape_type <span class="op">=</span> desc[<span class="st">&quot;shapeType&quot;</span>]</span>

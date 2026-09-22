@@ -31,7 +31,7 @@ Download the template notebook, `lab02_template.ipynb`, before you start. It has
 
 ## Warm-up: one row by hand
 
-Before you write a loop that performs the following work for every feature class, investigate what the loop body needs to produce for a single one. Here's an example of it for `ohio_counties.shp`, worked by hand:
+Before you write a loop that performs the following work for every feature class, investigate what the loop body needs to produce for a single one. Here's an example of it for `ohio_counties.shp`:
 
 ```python
 fc = "ohio_counties.shp"
