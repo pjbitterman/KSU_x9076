@@ -18,14 +18,13 @@ This lab has three tasks. Task A builds an inventory of a workspace. Task B batc
 
 Download the template notebook, `lab02_template.ipynb`, before you start. It has one markdown header and one seeded code cell per task below, in order — Task B assumes Task A's workspace setup, and Task C requires both, so do your work inside the template in order and submit the completed file.
 
-**Data:** All are present in the course repostory. The data you'll need are: 
+**Data:** All are present in the course repository. The data you'll need are: 
 
 - `ohio_counties.shp`
-- `portage_munis.shp`
+- `portage_adj_munis.shp`
 - `ohio_state_parks.shp`-
 -`streams_portage.geojson` file
-- ohio_precip_2025.csv`, all sitting directly in that folder 
-
+- ohio_precip_2025.csv`
 
 ---
 
@@ -77,7 +76,7 @@ print(f"{fc:<22} {shape_type:<10} {crs_name:<28} {count} features")
 
 **Do not hardcode the feature class names, shape types, or counts.** Your loop must discover everything from the workspace itself. If a file were added to or removed from the folder, your code should print a correspondingly different table without you touching it.
 
-**Expected output looks like:** one aligned row per feature class arcpy finds in the workspace (three rows for this dataset) each row showing a filename, a shape type word, a CRS name, and a feature count, in that order.
+**Expected output:** one aligned row per feature class arcpy finds in the workspace (three rows for this dataset) each row showing a filename, a shape type word, a CRS name, and a feature count, in that order.
 
 ---
 
@@ -122,7 +121,7 @@ Leave the dissolve option unset (or explicitly `"NONE"`) — you want one buffer
 
 After each successful buffer, print a one-line confirmation using `GetCount` on both the input and the output. For a non-dissolved buffer, those two counts should always match. If they don't, something is wrong with your dissolve setting.
 
-**Expected output looks like:** up to six confirmation lines (fewer on a re-run, replaced by "skipping..." lines), each naming an output file and showing two feature counts that match. Also, somewhere before or after the loop, one markdown sentence naming your two chosen distances and why.
+**Expected output:** up to six confirmation lines (fewer on a re-run, replaced by "skipping..." lines), each naming an output file and showing two feature counts that match. Also, somewhere before or after the loop, one markdown sentence naming your two chosen distances and why.
 
 ---
 
@@ -140,7 +139,7 @@ Every one of the above questions is answerable with tools you already have: `Lis
 
 Reuse your Task A inventory loop where it helps. For example, question 1, is nearly a one-line extension of it.
 
-**Expected output looks like:** five short code-cell answers (a printed sentence or value per question is enough — no fixed format required) plus one memo paragraph underneath, 3–5 sentences, that reads as a summary rather than five restated answers in a row.
+**Expected output:** five short code-cell answers (a printed sentence or value per question is enough — no fixed format required) plus one memo paragraph underneath, 3–5 sentences, that reads as a summary rather than five restated answers in a row.
 
 ---
 

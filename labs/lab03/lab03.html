@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Lab 2: Batch Geoprocessing and Data Interrogation</title>
+<title>Lab 3: The Format Detective’s Casebook</title>
 <style>
 
 span.smallcaps{font-variant: small-caps;}
@@ -2206,12 +2206,12 @@ vertical-align: -.125em;
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
 <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lab02.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="lab03.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Lab 2: Batch Geoprocessing and Data Interrogation</h1>
+<h1 class="title">Lab 3: The Format Detective’s Casebook</h1>
 </div>
 
 
@@ -2230,111 +2230,125 @@ vertical-align: -.125em;
 
 <section id="overview" class="level2">
 <h2 class="anchored" data-anchor-id="overview">Overview</h2>
-<p>Over the last few weeks, we have introduced:</p>
-<ol type="1">
-<li><strong>batch processing</strong>, which allows us to write one tool call, then loop it over everything in a workspace instead of running it by hand</li>
-<li><strong>interrogation</strong>, where we never trust a file’s shape, coordinate system, or fields until you’ve used <code>Describe</code> or <code>ListFields</code> directly.</li>
-</ol>
-<p>This lab has three tasks. Task A builds an inventory of a workspace. Task B batch-buffers everything inside the workspace. In Task C, you will answer factual questions about the data <strong><em>programmatically</em></strong>.</p>
-<p>Download the template notebook, <code>lab02_template.ipynb</code>, before you start. It has one markdown header and one seeded code cell per task below, in order — Task B assumes Task A’s workspace setup, and Task C requires both, so do your work inside the template in order and submit the completed file.</p>
-<p><strong>Data:</strong> All are present in the course repository. The data you’ll need are:</p>
+<p>This lab has four tasks. Task A builds a programmatic inventory of spatial data files. Task B identifies concrete behavioral differences between formats, with code evidence for each. Task C asks you to pick one format and standardize the project on it, justifying your choice. Note, there’s no single correct answer here, only a defensible one. Task D closes with a short recommendation memo.</p>
+<p>Download the template notebook, <code>lab03_template.ipynb</code>, before you start. It has one markdown header and one seeded code cell per task below.</p>
+<p><strong>Data:</strong> all of it already in the repository at <code>/data/part1/formats_zoo/</code>. Four items are already there: <code>counties.shp</code> (with its usual sidecars - <code>.shx</code>, <code>.dbf</code>, <code>.prj</code>, <code>.cpg</code>), <code>counties.gpkg</code>, <code>counties.parquet</code>, and <code>counties_attrs.csv</code> (an attribute-only export — no geometry, just the table). Save your notebook in the same folder.</p>
+<hr>
+</section>
+<section id="setup" class="level2">
+<h2 class="anchored" data-anchor-id="setup">Setup</h2>
+<p>Start the same way every notebook has since week 3: set the workspace and turn overwrite on.</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>arcpy.env.workspace <span class="op">=</span> <span class="st">&quot;YOURPATHHERE/data/part1/formats_zoo/&quot;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>arcpy.env.overwriteOutput <span class="op">=</span> <span class="va">True</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>This lab introduces two tools you haven’t seen before:</p>
+<blockquote class="blockquote">
 <ul>
-<li><code>ohio_counties.shp</code></li>
-<li><code>portage_adj_munis.shp</code></li>
-<li><code>ohio_state_parks.shp</code>- -<code>streams_portage.geojson</code> file</li>
-<li>ohio_precip_2025.csv`</li>
+<li><code>arcpy.management.CreateSQLiteDatabase(out_database_name, spatial_type)</code> — creates an empty SQLite database file. With <code>spatial_type</code> set to <code>&quot;GEOPACKAGE&quot;</code>, the file it creates is an empty GeoPackage. You need this because arcpy’s export tools can write a layer <em>into</em> a GeoPackage, but they won’t create the <code>.gpkg</code> container itself.</li>
+<li><code>arcpy.management.AddField(in_table, field_name, field_type)</code> — adds a new, empty field of the given type to an existing feature class or table.</li>
 </ul>
+</blockquote>
+<p>Before we move on to Task A, we’re going to create a new GeoPackage. Accordingly your inventory will contain five containers (instead of four).</p>
+<p><strong>This requires two steps:</strong> 1. Create the empty GeoPackage first 2. Export the shapefile into it as a layer named <code>counties</code></p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>arcpy.management.CreateSQLiteDatabase(<span class="st">&quot;counties_pro.gpkg&quot;</span>, <span class="st">&quot;GEOPACKAGE&quot;</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>arcpy.conversion.ExportFeatures(<span class="st">&quot;counties.shp&quot;</span>, <span class="st">&quot;counties_pro.gpkg/counties&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Order matters — the container has to be there before a layer can be written into it.</p>
+<p>You now have five items in the workspace: <code>counties.shp</code>, <code>counties.gpkg</code>, <code>counties.parquet</code>, <code>counties_attrs.csv</code>, and <code>counties_pro.gpkg/counties</code>. Each contains the same 88 counties.</p>
 <hr>
 </section>
-<section id="warm-up-one-row-by-hand" class="level2">
-<h2 class="anchored" data-anchor-id="warm-up-one-row-by-hand">Warm-up: one row by hand</h2>
-<p>Before you write a loop that performs the following work for every feature class, investigate what the loop body needs to produce for a single one. Here’s an example of it for <code>ohio_counties.shp</code>:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>fc <span class="op">=</span> <span class="st">&quot;ohio_counties.shp&quot;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>desc <span class="op">=</span> arcpy.da.Describe(fc)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>shape_type <span class="op">=</span> desc[<span class="st">&quot;shapeType&quot;</span>]</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>crs_name <span class="op">=</span> desc[<span class="st">&quot;spatialReference&quot;</span>].name</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>count_result <span class="op">=</span> arcpy.management.GetCount(fc)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>feature_count <span class="op">=</span> <span class="bu">int</span>(count_result[<span class="dv">0</span>])</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>fc<span class="sc">:&lt;22}</span><span class="ss"> </span><span class="sc">{</span>shape_type<span class="sc">:&lt;10}</span><span class="ss"> </span><span class="sc">{</span>crs_name<span class="sc">:&lt;28}</span><span class="ss"> </span><span class="sc">{</span>feature_count<span class="sc">}</span><span class="ss"> features&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The single <code>print</code> line is one row of Task A’s table. For Task A, you’ll need a loop that walks every feature class <code>arcpy.ListFeatureClasses()</code> finds. Therefore, the same four lines above (<code>desc</code>, <code>shape_type</code>, <code>crs_name</code>, <code>feature_count</code>) will become the body of that loop.</p>
-<hr>
-</section>
-<section id="task-a-inventory-script-22-points" class="level2">
-<h2 class="anchored" data-anchor-id="task-a-inventory-script-22-points">Task A: Inventory script (22 points)</h2>
-<p>Set <code>arcpy.env.workspace</code> to a sensible location and set <code>arcpy.env.overwriteOutput = True</code>.</p>
-<p>Use <code>arcpy.ListFeatureClasses()</code> to return every feature class arcpy can see in that workspace. Loop over the result and, for each feature class, print one row of a table with these four columns:</p>
+<section id="task-a-programmatic-inventory-19-points" class="level2">
+<h2 class="anchored" data-anchor-id="task-a-programmatic-inventory-19-points">Task A: Programmatic inventory (19 points)</h2>
+<p>Build a table with one row per item in the case file and four columns: <strong>format</strong>, <strong>size on disk</strong>, <strong>field count</strong>, and <strong>CRS</strong>.</p>
+<p><strong>EXAMPLE:</strong> Below is an <strong><em>EXAMPLE</em></strong> code block showing how to create a single row in the inventory table with a stand-in file (note, this is NOT one of your five - the numbers below are illustrative only, so this doesn’t hand you an answer for the real case file):</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>file_path <span class="op">=</span> <span class="st">&quot;C:/YOURPATH/formats_zoo/sample_layer.gpkg&quot;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>layer_path <span class="op">=</span> <span class="st">&quot;C:/YOURPATH/formats_zoo/sample_layer.gpkg/main.sample_layer&quot;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>fmt <span class="op">=</span> <span class="st">&quot;GeoPackage&quot;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>size_bytes <span class="op">=</span> os.path.getsize(file_path)   </span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>desc <span class="op">=</span> arcpy.da.Describe(layer_path)</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>field_count <span class="op">=</span> <span class="bu">len</span>(arcpy.ListFields(layer_path))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>crs <span class="op">=</span> desc[<span class="st">&quot;spatialReference&quot;</span>].name</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>fmt<span class="sc">:&lt;12}</span><span class="ss"> </span><span class="sc">{</span>size_bytes<span class="sc">:&gt;10}</span><span class="ss"> bytes  </span><span class="sc">{</span>field_count<span class="sc">:&gt;3}</span><span class="ss"> fields  </span><span class="sc">{</span>crs<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Note the GeoPackage row needs two paths: 1. the <code>.gpkg</code> <em>file</em> for <code>os.path.getsize()</code> 2. the <code>main.</code>-prefixed <em>layer</em> inside it for <code>Describe</code> and <code>ListFields</code></p>
+<p>Every row in your real inventory follows this same general design.</p>
+<p>Because the five items are genuinely different kinds of things (multi-file bundle, two single <code>.gpkg</code> files, a single <code>.parquet</code> file, and a plain CSV with no geometry at all) there’s no single <code>ListFeatureClasses()</code> call that discovers all five.</p>
+<p><strong>Every value in the table itself — size, field count, CRS — has to come from code, not from typing in a number you read off a properties dialog.</strong></p>
+<p>A few things worth knowing before you write the loop:</p>
 <ul>
-<li><strong>name</strong> — the feature class’s filename,</li>
-<li><strong>shapeType</strong> — from <code>Describe</code>,</li>
-<li><strong>CRS name</strong> — the coordinate reference system’s name, also from <code>Describe</code>,</li>
-<li><strong>feature count</strong> — the number of features it contains.</li>
+<li><strong>Size on disk</strong> isn’t one line of code for every item. A single file — either <code>.gpkg</code>, the <code>.parquet</code>, the <code>.csv</code> — is exactly what <code>os.path.getsize()</code> expects. The shapefile isn’t a single file. <code>os.scandir()</code> loops a folder’s entries the same way <code>os.listdir()</code> does, but hands back objects with a <code>.stat()</code> you can call directly:</li>
 </ul>
-<p>You already know how to pull <code>shapeType</code> and a CRS name out of <code>arcpy.da.Describe()</code> from week 4 (refer to our in-class notebooks if you need help).</p>
-<p>Feature count is new. <code>arcpy.management.GetCount()</code> takes a feature class and returns a <code>Result</code> object (not a plain number) so wrap it in <code>int(...)</code> to get something you can print, store, or compare. For example…</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>count_result <span class="op">=</span> arcpy.management.GetCount(<span class="st">&quot;ohio_counties.shp&quot;</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>feature_count <span class="op">=</span> <span class="bu">int</span>(count_result[<span class="dv">0</span>])</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(feature_count)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>Put those pieces together inside your loop over <code>ListFeatureClasses()</code>, and print one aligned row per feature class. In this case, use an f-string with <code>:&lt;</code> width specifiers:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>fc<span class="sc">:&lt;22}</span><span class="ss"> </span><span class="sc">{</span>shape_type<span class="sc">:&lt;10}</span><span class="ss"> </span><span class="sc">{</span>crs_name<span class="sc">:&lt;28}</span><span class="ss"> </span><span class="sc">{</span>count<span class="sc">}</span><span class="ss"> features&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p><strong>Do not hardcode the feature class names, shape types, or counts.</strong> Your loop must discover everything from the workspace itself. If a file were added to or removed from the folder, your code should print a correspondingly different table without you touching it.</p>
-<p><strong>Expected output:</strong> one aligned row per feature class arcpy finds in the workspace (three rows for this dataset) each row showing a filename, a shape type word, a CRS name, and a feature count, in that order.</p>
-<hr>
-</section>
-<section id="task-b-batch-buffer-30-points" class="level2">
-<h2 class="anchored" data-anchor-id="task-b-batch-buffer-30-points">Task B: Batch buffer (30 points)</h2>
-<p>Buffer <strong>every polygon feature class</strong> in the workspace at <strong>two different distances of your choosing</strong>. Pick two values that make sense for these data and say what you picked and why, in one sentence, in a markdown cell.</p>
-<p>Reuse the derived-output-name pattern from our in-class work: strip the input’s extension, and build the output name with an f-string that incorporates the distance, (e.g. something in the shape of <code>f&quot;{base_name}_{distance_label}.shp&quot;</code>). You’ll need to use a nested loop — one loop over your two distances, one loop over the feature classes — so that every feature class gets buffered at both distances (six output files total, from three feature classes and two distances).</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> entry <span class="kw">in</span> os.scandir(<span class="st">&quot;C:/YOURPATH/formats_zoo&quot;</span>):</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> entry.is_file():</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>entry<span class="sc">.</span>name<span class="sc">:&lt;24}</span><span class="ss"> </span><span class="sc">{</span>entry<span class="sc">.</span>stat()<span class="sc">.</span>st_size<span class="sc">}</span><span class="ss"> bytes&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>The shapefile is its own small challenge: <code>counties.shp</code> alone is only the geometry. Its real “size on disk” is the sum of every sidecar file sharing the name <code>counties</code> — <code>.shp</code>, <code>.shx</code>, <code>.dbf</code>, <code>.prj</code>, <code>.cpg</code> — which is the kind of thing a quick <code>os.scandir()</code> loop, filtered on a matching base name, can accomplish.</p>
 <details>
 <summary>
-Hint: the derived-name pattern
+Hint: two cases, one decision per item
 </summary>
-<p>“Derived” means the output name is <em>built from</em> the input’s name and the current distance, not typed once per file. A possible shape to follow:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>base_name <span class="op">=</span> fc.replace(<span class="st">&quot;.shp&quot;</span>, <span class="st">&quot;&quot;</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>out_name <span class="op">=</span> <span class="ss">f&quot;</span><span class="sc">{</span>base_name<span class="sc">}</span><span class="ss">_</span><span class="sc">{</span>distance<span class="sc">}</span><span class="ss">mi.shp&quot;</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Before you write the size line for a given item, ask which of two buckets it falls into:</p>
+<ol type="1">
+<li><strong>A single file</strong> (<code>.gpkg</code>, <code>.parquet</code>, <code>.csv</code>)? Then <code>os.path.getsize(path)</code> is the answer</li>
+<li><strong>A multi-file bundle sharing a base name</strong> (the shapefile)? Then loop <code>os.scandir()</code> over the folder, keep only entries whose name starts with the base name (<code>&quot;counties.&quot;</code>), and sum <code>entry.stat().st_size</code> across the matches. Watch the trailing dot in <code>&quot;counties.&quot;</code></li>
+</ol>
+You may need to write one small helper function that takes a path and returns a size handling both cases. You could then call it from your inventory loop, rather than repeating the branching logic five times.
 </details>
-<p>Use two checks to “guard” the execusion in two ways:</p>
 <ul>
-<li><strong><code>arcpy.env.overwriteOutput = True</code></strong></li>
-<li><strong><code>arcpy.Exists()</code></strong>, checked before each <code>Buffer</code> call, so a re-run <em>skips</em> work that’s already done instead of silently redoing it. Print a <code>&quot;skipping ... -- already exists&quot;</code> line when this happens, same as the pattern in-class.</li>
+<li><p><strong>Field count and CRS</strong> come from <code>arcpy.da.Describe()</code>, the same dictionary-style access from in-class. <code>counties_attrs.csv</code> is the oddball - it’s a table, not a feature class, so it has no coordinate system. Trying to read <code>desc[&quot;spatialReference&quot;]</code> off a plain table raises a <code>KeyError</code>, so you’ll need to wrap that specific access in <code>try</code>/<code>except</code> block and report <code>&quot;N/A&quot;</code> when it fails. After all, you wouldn’t want to let a non-spatial item crash the whole loop.</p></li>
+<li><p><code>counties.parquet</code> is potentially problematic. Whether <code>arcpy.da.Describe()</code> can open a <code>.parquet</code> file depends on the ArcGIS Pro version on the machine you’re using. If it raises an error for you, catch it, report what <code>os.path.getsize()</code> gives you, and note in your table that <code>Describe</code> wasn’t available for that row on your machine.</p></li>
 </ul>
-<details>
-<summary>
-Hint: the Exists guard
-</summary>
-<p>Check <em>before</em> you call <code>Buffer</code>, not after. After all, the point is to skip the call entirely, not to run it and then notice:</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> arcpy.Exists(out_name):</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span>(<span class="ss">f&quot;skipping </span><span class="sc">{</span>out_name<span class="sc">}</span><span class="ss"> -- already exists&quot;</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="cf">else</span>:</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    arcpy.analysis.Buffer(fc, out_name, <span class="ss">f&quot;</span><span class="sc">{</span>distance<span class="sc">}</span><span class="ss"> Miles&quot;</span>, dissolve_option<span class="op">=</span><span class="st">&quot;NONE&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-This has to sit <em>inside</em> both loops, immediately before the <code>Buffer</code> call, so it’s checked for every one of the six planned outputs.
-</details>
-<p>Leave the dissolve option unset (or explicitly <code>&quot;NONE&quot;</code>) — you want one buffer polygon per input feature, not one merged shape per feature class.</p>
-<p>After each successful buffer, print a one-line confirmation using <code>GetCount</code> on both the input and the output. For a non-dissolved buffer, those two counts should always match. If they don’t, something is wrong with your dissolve setting.</p>
-<p><strong>Expected output:</strong> up to six confirmation lines (fewer on a re-run, replaced by “skipping…” lines), each naming an output file and showing two feature counts that match. Also, somewhere before or after the loop, one markdown sentence naming your two chosen distances and why.</p>
+<p>Do not hardcode any of the computed values.</p>
 <hr>
 </section>
-<section id="task-c-interrogation-memo-19-points" class="level2">
-<h2 class="anchored" data-anchor-id="task-c-interrogation-memo-19-points">Task C: Interrogation memo (19 points)</h2>
-<p>Answer each of the five questions below with a code cell (the code, not you, should determine the answer) and then write a short markdown memo cell (3–5 sentences) underneath, summarizing what you found across all five <strong><em>in your own words</em></strong>.</p>
-<ol type="1">
-<li>Which of the three feature classes has the most features, and how many does it have?</li>
-<li>Which feature classes share a coordinate reference system, and which one differs? Name the CRS(s) involved.</li>
-<li>Counting every field <code>arcpy.ListFields()</code> returns for each feature class (including the fields arcpy adds automatically, like <code>FID</code> and <code>Shape</code>), which feature class has the most total fields, and which has the fewest?</li>
-<li>Is <code>streams_portage.geojson</code> included in the list <code>arcpy.ListFeatureClasses()</code> returns from this workspace? Confirm your answer with code (don’t just guess) and explain, in one sentence, why it does or doesn’t show up there.</li>
-<li>Do all three feature classes have a field named exactly <code>NAME</code> (all uppercase)? Confirm with code; if one of them doesn’t, state which one, and what its actual field name is instead.</li>
+<section id="task-b-the-differences-hunt-23-points" class="level2">
+<h2 class="anchored" data-anchor-id="task-b-the-differences-hunt-23-points">Task B: The differences hunt (23 points)</h2>
+<p>An inventory table tells you <em>what’s there</em>. But this task asks you to go one step further and find <em>what actually behaves differently</em> between formats. Here, we’re looking for concrete differences, each provided by code.</p>
+<p>Two are required, and you already have everything you need to identify them:</p>
+<p><strong>1. The ten-character wall.</strong> Week 4 described shapefile’s 10-character field-name limit we didn’t work with it directly. Add a field with a name well over 10 characters to the GeoPackage copy you built in Setup, then export that layer to a fresh shapefile and compare field names on both sides. This will the one new tool in this lab: <code>AddField</code>. Here’s an example:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>arcpy.management.AddField(<span class="st">&quot;counties_pro.gpkg/main.counties&quot;</span>, <span class="st">&quot;median_household_income&quot;</span>, <span class="st">&quot;DOUBLE&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>arcpy.conversion.ExportFeatures(<span class="st">&quot;counties_pro.gpkg/main.counties&quot;</span>, <span class="st">&quot;trunc_test.shp&quot;</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>gpkg_fields <span class="op">=</span> [f.name <span class="cf">for</span> f <span class="kw">in</span> arcpy.ListFields(<span class="st">&quot;counties_pro.gpkg/main.counties&quot;</span>)]</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>shp_fields <span class="op">=</span> [f.name <span class="cf">for</span> f <span class="kw">in</span> arcpy.ListFields(<span class="st">&quot;trunc_test.shp&quot;</span>)]</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Print both lists. The GeoPackage field name should come through intact; the shapefile version won’t. State, in your own words, what the shapefile version’s name actually is and why.</p>
+<p><strong>2. Two GeoPackages, two different primary-key names.</strong> <code>counties.gpkg</code> (the one that was already in the folder) and <code>counties_pro.gpkg</code> (the one you built in Setup) are both, structurally, the same kind of container (i.e., a single-file SQLite database). Compare their <code>OIDFieldName</code> (the field arcpy uses as each dataset’s unique row identifier) using <code>arcpy.da.Describe()</code>:</p>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>old_desc <span class="op">=</span> arcpy.da.Describe(<span class="st">&quot;counties.gpkg/main.counties&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>new_desc <span class="op">=</span> arcpy.da.Describe(<span class="st">&quot;counties_pro.gpkg/main.counties&quot;</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;counties.gpkg:    </span><span class="sc">{</span>old_desc[<span class="st">&#39;OIDFieldName&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(<span class="ss">f&quot;counties_pro.gpkg: </span><span class="sc">{</span>new_desc[<span class="st">&#39;OIDFieldName&#39;</span>]<span class="sc">}</span><span class="ss">&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<p>Both paths use the <code>main.</code> prefix — Esri addresses a GeoPackage’s layers as <code>main.&lt;layer&gt;</code>. The two <code>OIDFieldName</code> values should not match, even though both files are GeoPackages holding the identical 88 counties. In a sentence, explain why. As a hint, consider the process used to create each file.</p>
+<p><strong>Pick a third difference yourself.</strong> Maybe file count? Size? Something else?</p>
+<hr>
+</section>
+<section id="task-c-standardize-19-points" class="level2">
+<h2 class="anchored" data-anchor-id="task-c-standardize-19-points">Task C: Standardize (19 points)</h2>
+<p>Pick <strong>one</strong> format and make the case that it’s the right one to standardize this project on going forward. There’s no single correct answer here.</p>
+<p>Produce a clean <code>standardized/</code> subfolder inside <code>formats_zoo</code> containing exactly one canonical copy of the 88 counties, written in your chosen format. If you pick GeoParquet, remember the caveat about version compatibility.</p>
+<p>In a markdown cell underneath, write 4-6 sentences justifying your choice: what you’re optimizing for (e.g., compatibility, size, editability, standards-compliance, something else), and what you’re giving up by not choosing a different format.</p>
+<hr>
+</section>
+<section id="task-d-recommendation-memo-10-points" class="level2">
+<h2 class="anchored" data-anchor-id="task-d-recommendation-memo-10-points">Task D: Recommendation memo (10 points)</h2>
+<p>Write a memo, <strong>300 words or fewer</strong>, recommending a format for each of three separate situations:</p>
+<ol type="a">
+<li><strong>emailing a finished dataset to a colleague</strong> who may or may not be running Esri software,</li>
+<li><strong>archiving a 10-million-row dataset</strong> that will mostly be read, rarely edited, and</li>
+<li><strong>daily hands-on editing inside ArcGIS Pro</strong>, on a project that will grow subtypes and domains over time.</li>
 </ol>
-<p>Every one of the above questions is answerable with tools you already have: <code>ListFeatureClasses</code>, <code>Describe</code>, <code>ListFields</code>, <code>GetCount</code>, and a loop (or two). None require reading individual attribute <em>values</em> row by row.</p>
-<p>Reuse your Task A inventory loop where it helps. For example, question 1, is nearly a one-line extension of it.</p>
-<p><strong>Expected output:</strong> five short code-cell answers (a printed sentence or value per question is enough — no fixed format required) plus one memo paragraph underneath, 3–5 sentences, that reads as a summary rather than five restated answers in a row.</p>
+<p>Ground each recommendation in something you actually observed this lab rather than restating week 4’s lecture.</p>
 <hr>
 </section>
 <section id="deliverables-and-submission" class="level2">
 <h2 class="anchored" data-anchor-id="deliverables-and-submission">Deliverables and submission</h2>
 <p>Submit through Canvas:</p>
 <ol type="1">
-<li>Your completed template notebook (<code>lab02_template.ipynb</code>), containing Task A’s inventory table and its printed output, Task B’s batch-buffer code and its confirmation lines, and Task C’s five code-and-answer pairs plus your memo paragraph. The must all in one file, runnable top to bottom.</li>
+<li>Your completed template notebook (<code>lab03_template.ipynb</code>), containing Setup’s new GeoPackage, Task A’s inventory table and the code that produced it, Task B’s three differences with code evidence and interpretation, Task C’s standardized output and justification, and Task D’s memo.</li>
 </ol>
+<p><strong>Submit code as code, not screenshots of code</strong> — same rule as every lab this term. A screenshot can’t be run, copied, or checked; paste and run your actual code in the notebook.</p>
 </section>
 <section id="point-breakdown" class="level2">
 <h2 class="anchored" data-anchor-id="point-breakdown">Point breakdown</h2>
@@ -2347,28 +2361,32 @@ This has to sit <em>inside</em> both loops, immediately before the <code>Buffer<
 </thead>
 <tbody>
 <tr class="odd">
-<td>Task A: Inventory script</td>
-<td>22</td>
-</tr>
-<tr class="even">
-<td>Task B: Batch buffer</td>
-<td>30</td>
-</tr>
-<tr class="odd">
-<td>Task C: Interrogation memo</td>
+<td>Task A: Programmatic inventory</td>
 <td>19</td>
 </tr>
 <tr class="even">
+<td>Task B: The differences hunt</td>
+<td>23</td>
+</tr>
+<tr class="odd">
+<td>Task C: Standardize</td>
+<td>19</td>
+</tr>
+<tr class="even">
+<td>Task D: Recommendation memo</td>
+<td>10</td>
+</tr>
+<tr class="odd">
 <td>Style and naming</td>
 <td>4</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><strong>Total</strong></td>
 <td><strong>75</strong></td>
 </tr>
 </tbody>
 </table>
-<p>“Style and naming” covers <code>snake_case</code> variable names, f-strings for all formatted output, and derived (not hand-typed) output names in Task B.</p>
+<p>“Style and naming” covers <code>snake_case</code> variable names, f-strings for all formatted output, and derived (not hand-typed) values anywhere the lab asks for something computed — the same conventions from Labs 1 and 2.</p>
 <p>Late work follows the course late policy.</p>
 </section>
 
