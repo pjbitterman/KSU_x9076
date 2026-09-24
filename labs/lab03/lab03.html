@@ -2274,17 +2274,17 @@ vertical-align: -.125em;
 <p>Note the GeoPackage row needs two paths: 1. the <code>.gpkg</code> <em>file</em> for <code>os.path.getsize()</code> 2. the <code>main.</code>-prefixed <em>layer</em> inside it for <code>Describe</code> and <code>ListFields</code></p>
 <p>Every row in your real inventory follows this same general design.</p>
 <p>Because the five items are genuinely different kinds of things (multi-file bundle, two single <code>.gpkg</code> files, a single <code>.parquet</code> file, and a plain CSV with no geometry at all) there’s no single <code>ListFeatureClasses()</code> call that discovers all five.</p>
-<p><strong>Every value in the table itself — size, field count, CRS — has to come from code, not from typing in a number you read off a properties dialog.</strong></p>
+<p><strong>Every value in the table itself (size, field count, CRS) has to come from code, not from typing in a number you read off a properties dialog.</strong></p>
 <p>A few things worth knowing before you write the loop:</p>
 <ul>
-<li><strong>Size on disk</strong> isn’t one line of code for every item. A single file — either <code>.gpkg</code>, the <code>.parquet</code>, the <code>.csv</code> — is exactly what <code>os.path.getsize()</code> expects. The shapefile isn’t a single file. <code>os.scandir()</code> loops a folder’s entries the same way <code>os.listdir()</code> does, but hands back objects with a <code>.stat()</code> you can call directly:</li>
+<li><strong>Size on disk</strong> isn’t one line of code for every item. A single file (either <code>.gpkg</code>, the <code>.parquet</code>, the <code>.csv</code>) is what <code>os.path.getsize()</code> expects. A shapefile isn’t a single file. <code>os.scandir()</code> loops a folder’s entries the same way <code>os.listdir()</code> does, but hands back objects with a <code>.stat()</code> you can call directly:</li>
 </ul>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> os</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> entry <span class="kw">in</span> os.scandir(<span class="st">&quot;C:/YOURPATH/formats_zoo&quot;</span>):</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> entry.is_file():</span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span>(<span class="ss">f&quot;</span><span class="sc">{</span>entry<span class="sc">.</span>name<span class="sc">:&lt;24}</span><span class="ss"> </span><span class="sc">{</span>entry<span class="sc">.</span>stat()<span class="sc">.</span>st_size<span class="sc">}</span><span class="ss"> bytes&quot;</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>The shapefile is its own small challenge: <code>counties.shp</code> alone is only the geometry. Its real “size on disk” is the sum of every sidecar file sharing the name <code>counties</code> — <code>.shp</code>, <code>.shx</code>, <code>.dbf</code>, <code>.prj</code>, <code>.cpg</code> — which is the kind of thing a quick <code>os.scandir()</code> loop, filtered on a matching base name, can accomplish.</p>
+<p>The shapefile is its own challenge: <code>counties.shp</code> alone is only the geometry. Its real “size on disk” is the sum of every sidecar file sharing the name <code>counties</code> (<code>.shp</code>, <code>.shx</code>, <code>.dbf</code>, <code>.prj</code>, <code>.cpg</code>) which is the kind of thing a quick <code>os.scandir()</code> loop, filtered on a matching base name, can accomplish.</p>
 <details>
 <summary>
 Hint: two cases, one decision per item
@@ -2305,9 +2305,9 @@ You may need to write one small helper function that takes a path and returns a 
 </section>
 <section id="task-b-the-differences-hunt-23-points" class="level2">
 <h2 class="anchored" data-anchor-id="task-b-the-differences-hunt-23-points">Task B: The differences hunt (23 points)</h2>
-<p>An inventory table tells you <em>what’s there</em>. But this task asks you to go one step further and find <em>what actually behaves differently</em> between formats. Here, we’re looking for concrete differences, each provided by code.</p>
-<p>Two are required, and you already have everything you need to identify them:</p>
-<p><strong>1. The ten-character wall.</strong> Week 4 described shapefile’s 10-character field-name limit we didn’t work with it directly. Add a field with a name well over 10 characters to the GeoPackage copy you built in Setup, then export that layer to a fresh shapefile and compare field names on both sides. This will the one new tool in this lab: <code>AddField</code>. Here’s an example:</p>
+<p>An inventory table tells you <em>what’s present</em>. This task asks you to go a step further and find <em>what actually behaves differently</em> between formats. Here, we’re looking for concrete differences, each provided by code.</p>
+<p>Two are required. You have everything you need to identify them:</p>
+<p><strong>1. The ten-character wall.</strong> our in-class discussions and notebooks explained shapefile’s 10-character field-name limit, even if we didn’t work with it directly. Add a field with a name well over 10 characters to the GeoPackage copy you built in Setup, then export that layer to a fresh shapefile and compare field names on both sides. This will the one new tool in this lab: <code>AddField</code>. Here’s an example:</p>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>arcpy.management.AddField(<span class="st">&quot;counties_pro.gpkg/main.counties&quot;</span>, <span class="st">&quot;median_household_income&quot;</span>, <span class="st">&quot;DOUBLE&quot;</span>)</span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>arcpy.conversion.ExportFeatures(<span class="st">&quot;counties_pro.gpkg/main.counties&quot;</span>, <span class="st">&quot;trunc_test.shp&quot;</span>)</span>
 <span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a></span>

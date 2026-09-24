@@ -79,11 +79,11 @@ Every row in your real inventory follows this same general design.
 
 Because the five items are genuinely different kinds of things (multi-file bundle, two single `.gpkg` files, a single `.parquet` file, and a plain CSV with no geometry at all) there's no single `ListFeatureClasses()` call that discovers all five.
 
-**Every value in the table itself — size, field count, CRS — has to come from code, not from typing in a number you read off a properties dialog.**
+**Every value in the table itself (size, field count, CRS) has to come from code, not from typing in a number you read off a properties dialog.**
 
 A few things worth knowing before you write the loop:
 
-- **Size on disk** isn't one line of code for every item. A single file — either `.gpkg`, the `.parquet`, the `.csv` — is exactly what `os.path.getsize()` expects. The shapefile isn't a single file. `os.scandir()` loops a folder's entries the same way `os.listdir()` does, but hands back objects with a `.stat()` you can call directly:
+- **Size on disk** isn't one line of code for every item. A single file (either `.gpkg`, the `.parquet`, the `.csv`) is what `os.path.getsize()` expects. A shapefile isn't a single file. `os.scandir()` loops a folder's entries the same way `os.listdir()` does, but hands back objects with a `.stat()` you can call directly:
 
 ```python
 import os
@@ -93,7 +93,7 @@ for entry in os.scandir("C:/YOURPATH/formats_zoo"):
         print(f"{entry.name:<24} {entry.stat().st_size} bytes")
 ```
 
-The shapefile is its own small challenge: `counties.shp` alone is only the geometry. Its real "size on disk" is the sum of every sidecar file sharing the name `counties` — `.shp`, `.shx`, `.dbf`, `.prj`, `.cpg` — which is the kind of thing a quick `os.scandir()` loop, filtered on a matching base name, can accomplish.
+The shapefile is its own challenge: `counties.shp` alone is only the geometry. Its real "size on disk" is the sum of every sidecar file sharing the name `counties` (`.shp`, `.shx`, `.dbf`, `.prj`, `.cpg`) which is the kind of thing a quick `os.scandir()` loop, filtered on a matching base name, can accomplish.
 
 <details>
 <summary>Hint: two cases, one decision per item</summary>
@@ -116,11 +116,11 @@ Do not hardcode any of the computed values.
 
 ## Task B: The differences hunt (23 points)
 
-An inventory table tells you *what's there*. But this task asks you to go one step further and find *what actually behaves differently* between formats. Here, we're looking for concrete differences, each provided by code.
+An inventory table tells you *what's present*. This task asks you to go a step further and find *what actually behaves differently* between formats. Here, we're looking for concrete differences, each provided by code.
 
-Two are required, and you already have everything you need to identify them:
+Two are required. You have everything you need to identify them:
 
-**1. The ten-character wall.** Week 4 described shapefile's 10-character field-name limit we didn't work with it directly. Add a field with a name well over 10 characters to the GeoPackage copy you built in Setup, then export that layer to a fresh shapefile and compare field names on both sides. This will the one new tool in this lab: `AddField`. Here's an example:
+**1. The ten-character wall.** our in-class discussions and notebooks explained shapefile's 10-character field-name limit, even if we didn't work with it directly. Add a field with a name well over 10 characters to the GeoPackage copy you built in Setup, then export that layer to a fresh shapefile and compare field names on both sides. This will the one new tool in this lab: `AddField`. Here's an example:
 
 ```python
 arcpy.management.AddField("counties_pro.gpkg/main.counties", "median_household_income", "DOUBLE")
