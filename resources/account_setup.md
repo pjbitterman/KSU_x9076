@@ -48,5 +48,5 @@ We will eventually engage with these AI tools, but it's important to understand 
 ## Troubleshooting / common snags
 
 - **Which email should I use for GitHub — personal or `kent.edu`?** Either works fine for the account itself. The one thing that matters: the **Student Developer Pack** specifically needs your `kent.edu` email linked to verify you're a student, so make sure that email is added to your GitHub account (Settings → Emails) even if it's not your primary one.
-- **Colab says my session expired / disconnected.** This is normal, and not a problem — Colab runtimes are temporary and time out after a while of inactivity. Just rerun the notebook's setup cell(s) from the top and you should be back where you were.
+- **Colab says my session expired / disconnected.** This is normal, and not a problem. Colab runtimes are temporary and time out after a while of inactivity. Just rerun the notebook's setup cell(s) from the top and you should be back where you were.
 - **Still stuck?** Ask in class or come by office hours
