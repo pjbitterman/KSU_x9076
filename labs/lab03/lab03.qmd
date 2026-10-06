@@ -13,13 +13,13 @@ This lab has four tasks. Task A builds a programmatic inventory of spatial data 
 
 Download the template notebook, `lab03_template.ipynb`, before you start. It has one markdown header and one seeded code cell per task below.
 
-**Data:** all of it already in the repository at `/data/part1/formats_zoo/`. Four items are already there: `counties.shp` (with its usual sidecars - `.shx`, `.dbf`, `.prj`, `.cpg`), `counties.gpkg`, `counties.parquet`, and `counties_attrs.csv` (an attribute-only export — no geometry, just the table). Save your notebook in the same folder.
+**Data:** all of it already in the repository at `/data/part1/formats_zoo/`. Four items are included: `counties.shp` (with its usual sidecars - `.shx`, `.dbf`, `.prj`, `.cpg`), `counties.gpkg`, `counties.parquet`, and `counties_attrs.csv` (just the table). Save your notebook in the same folder.
 
 ---
 
 ## Setup
 
-Start the same way every notebook has since week 3: set the workspace and turn overwrite on.
+Set the workspace and turn the overwrite flag on.
 
 ```python
 arcpy.env.workspace = "YOURPATHHERE/data/part1/formats_zoo/"
@@ -29,7 +29,7 @@ arcpy.env.overwriteOutput = True
 
 This lab introduces two tools you haven't seen before:
 
-> - `arcpy.management.CreateSQLiteDatabase(out_database_name, spatial_type)` — creates an empty SQLite database file. With `spatial_type` set to `"GEOPACKAGE"`, the file it creates is an empty GeoPackage. You need this because arcpy's export tools can write a layer *into* a GeoPackage, but they won't create the `.gpkg` container itself.
+> - `arcpy.management.CreateSQLiteDatabase(out_database_name, spatial_type)` — creates an empty SQLite database file. With `spatial_type` set to `"GEOPACKAGE"`, the file it creates is an empty GeoPackage. This is reqruied because arcpy's export tools can write a layer *into* a GeoPackage, but they won't create the `.gpkg` container itself.
 > - `arcpy.management.AddField(in_table, field_name, field_type)` — adds a new, empty field of the given type to an existing feature class or table.
 
 Before we move on to Task A, we're going to create a new GeoPackage. Accordingly your inventory will contain five containers (instead of four).
@@ -77,7 +77,7 @@ Note the GeoPackage row needs two paths:
 
 Every row in your real inventory follows this same general design.
 
-Because the five items are genuinely different kinds of things (multi-file bundle, two single `.gpkg` files, a single `.parquet` file, and a plain CSV with no geometry at all) there's no single `ListFeatureClasses()` call that discovers all five.
+Because the five items are of different types (multi-file bundle, two single `.gpkg` files, a single `.parquet` file, and a plain CSV with no geometry at all), a `ListFeatureClasses()` call will not discover all five.
 
 **Every value in the table itself (size, field count, CRS) has to come from code, not from typing in a number you read off a properties dialog.**
 
@@ -93,7 +93,7 @@ for entry in os.scandir("C:/YOURPATH/formats_zoo"):
         print(f"{entry.name:<24} {entry.stat().st_size} bytes")
 ```
 
-The shapefile is its own challenge: `counties.shp` alone is only the geometry. Its real "size on disk" is the sum of every sidecar file sharing the name `counties` (`.shp`, `.shx`, `.dbf`, `.prj`, `.cpg`) which is the kind of thing a quick `os.scandir()` loop, filtered on a matching base name, can accomplish.
+The shapefile is its own challenge: `counties.shp` contains only the geometry. Its real "size on disk" is the sum of every sidecar file sharing the name `counties` (`.shp`, `.shx`, `.dbf`, `.prj`, `.cpg`) which can be calculated by a  `os.scandir()` loop, filtered on a matching base name.
 
 <details>
 <summary>Hint: two cases, one decision per item</summary>
@@ -106,7 +106,7 @@ Before you write the size line for a given item, ask which of two buckets it fal
 You may need to write one small helper function that takes a path and returns a size handling both cases. You could then call it from your inventory loop, rather than repeating the branching logic five times.
 </details>
 
-- **Field count and CRS** come from `arcpy.da.Describe()`, the same dictionary-style access from in-class. `counties_attrs.csv` is the oddball - it's a table, not a feature class, so it has no coordinate system. Trying to read `desc["spatialReference"]` off a plain table raises a `KeyError`, so you'll need to wrap that specific access in `try`/`except` block and report `"N/A"` when it fails. After all, you wouldn't want to let a non-spatial item crash the whole loop.
+- **Field count and CRS** come from `arcpy.da.Describe()`, the same dictionary-style access from in-class. `counties_attrs.csv` is the oddball - it's a table, not a feature class, so it has no coordinate system. Attempting to read `desc["spatialReference"]` from a plain table raises a `KeyError`, so you'll need to wrap that specific access in `try`/`except` block and report `"N/A"` when it fails. After all, you wouldn't want to let a non-spatial item crash the whole loop.
 
 - `counties.parquet` is potentially problematic. Whether `arcpy.da.Describe()` can open a `.parquet` file depends on the ArcGIS Pro version on the machine you're using. If it raises an error for you, catch it, report what `os.path.getsize()` gives you, and note in your table that `Describe` wasn't available for that row on your machine.
 
@@ -114,9 +114,9 @@ Do not hardcode any of the computed values.
 
 ---
 
-## Task B: The differences hunt (23 points)
+## Task B: The search for differences (23 points)
 
-An inventory table tells you *what's present*. This task asks you to go a step further and find *what actually behaves differently* between formats. Here, we're looking for concrete differences, each provided by code.
+An inventory table tells you *what's present* in the directory. This task requires you to go a step further and find *what actually behaves differently* between formats. Here, we're looking for concrete differences, each provided by code.
 
 Two are required. You have everything you need to identify them:
 
@@ -124,13 +124,15 @@ Two are required. You have everything you need to identify them:
 
 ```python
 arcpy.management.AddField("counties_pro.gpkg/main.counties", "median_household_income", "DOUBLE")
-arcpy.conversion.ExportFeatures("counties_pro.gpkg/main.counties", "trunc_test.shp")
+arcpy.management.CopyFeatures("counties_pro.gpkg/main.counties", "trunc_test.shp")
 
 gpkg_fields = [f.name for f in arcpy.ListFields("counties_pro.gpkg/main.counties")]
 shp_fields = [f.name for f in arcpy.ListFields("trunc_test.shp")]
 ```
 
 Print both lists. The GeoPackage field name should come through intact; the shapefile version won't. State, in your own words, what the shapefile version's name actually is and why.
+
+Note the use of a different tool. This step uses `arcpy.management.CopyFeatures`, not the `ExportFeatures` call from Setup. `ExportFeatures` checks every output field name against the output format before it writes anything, and a 23-character name is illegal in a shapefile's dBASE table, so it stops with error 000142 instead of producing a file. `CopyFeatures` does no field mapping; it writes the shapefile, shortens the name to fit, and reports a warning.
 
 **2. Two GeoPackages, two different primary-key names.** `counties.gpkg` (the one that was already in the folder) and `counties_pro.gpkg` (the one you built in Setup) are both, structurally, the same kind of container (i.e., a single-file SQLite database). Compare their `OIDFieldName` (the field arcpy uses as each dataset's unique row identifier) using `arcpy.da.Describe()`:
 
@@ -176,7 +178,7 @@ Submit through Canvas:
 
 1. Your completed template notebook (`lab03_template.ipynb`), containing Setup's new GeoPackage, Task A's inventory table and the code that produced it, Task B's three differences with code evidence and interpretation, Task C's standardized output and justification, and Task D's memo.
 
-**Submit code as code, not screenshots of code** — same rule as every lab this term. A screenshot can't be run, copied, or checked; paste and run your actual code in the notebook.
+**Submit code as code, not screenshots of code** 
 
 ## Point breakdown
 
@@ -189,6 +191,6 @@ Submit through Canvas:
 | Style and naming | 4 |
 | **Total** | **75** |
 
-"Style and naming" covers `snake_case` variable names, f-strings for all formatted output, and derived (not hand-typed) values anywhere the lab asks for something computed — the same conventions from Labs 1 and 2.
+"Style and naming" covers `snake_case` variable names, f-strings for all formatted output, and derived (not hand-typed) values anywhere the lab asks for something computed.
 
 Late work follows the course late policy.

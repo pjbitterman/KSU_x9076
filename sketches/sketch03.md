@@ -12,7 +12,7 @@ A geoprocessing tool that only runs once and with one hardcoded input isn't reus
 Write a Python function that:
 
 - Takes **at least two parameters** (for example, an input feature class and a distance, or an input and an output path).
-- Wraps **one geoprocessing tool** of your choice (Buffer, Clip, Dissolve, Select — anything you've used so far), using modern arcpy syntax, e.g. `arcpy.analysis.Buffer(...)`, not `Buffer_analysis(...)`.
+- Wraps **one geoprocessing tool** of your choice (Buffer, Clip, Dissolve, Select — anything you've used so far), using modern arcpy syntax, e.g. `arcpy.analysis.Buffer(...)`.
 - Uses a `try`/`except` block so that if the tool fails (bad input, missing file, license issue, etc.), your function prints or logs a clear message instead of crashing with a raw traceback.
 - Has a **docstring** explaining what the function does and what its parameters are.
 
