@@ -9,7 +9,7 @@ You do not need to create any accounts or install any software to start this cou
 
 ## Part 2
 
-At approximately Week 8, the course will pivot from using ArcGIS Pro in the campus lab to the open-source Python stack running in your browser. That shift requires two free accounts: **GitHub** and **Google**. Both only take a few minutes. 
+At approximately Week 8, the course will pivot from using ArcGIS Pro in the campus lab to the open-source Python stack running in your browser. That shift requires two free accounts: **GitHub** and **Google**. Both will only take you a few minutes. 
 
 ### 1. GitHub
 
@@ -24,11 +24,11 @@ At approximately Week 8, the course will pivot from using ArcGIS Pro in the camp
 
 ### 2. Google account → Colab
 
-Most of you already have a Google account (Gmail, a `kent.edu` account running on Google, an old YouTube sign-up — any of these work). If you don't, [Google's account sign-up page](https://accounts.google.com/signup) walks you through creating one, free.
+Most of you already have a Google account (Gmail, a `kent.edu` account running on Google, an old YouTube sign-up — any of these work). If you don't, [Google's account sign-up page](https://accounts.google.com/signup) walks you through creating one for free.
 
-Once you have a Google account, there's nothing to install. Just go to [colab.research.google.com](https://colab.research.google.com) signed in with that account, and you're in Google Colab, a Jupyter notebook that runs entirely in your browser on Google's servers. (See Google's [Colaboratory FAQ](https://research.google.com/colaboratory/faq.html) if you want the full rundown of what Colab is.)
+Once you have a Google account, there's nothing to install. Just navigate to [colab.research.google.com](https://colab.research.google.com) signed in with that account, and you're in Google Colab, a Jupyter notebook that runs entirely in your browser on Google's servers. (See Google's [Colaboratory FAQ](https://research.google.com/colaboratory/faq.html) if you want the full rundown of what Colab is.)
 
-**Your first 60 seconds in Colab**, once you're signed in and want to try it:
+*Once you're signed in and want to try it:
 
 1. Click **New notebook**.
 2. Click into the first cell and type `1 + 1`.
@@ -38,7 +38,7 @@ One key distinction for now: Colab notebooks autosave to **your Google Drive**, 
 
 ### Turn off built-in AI assistance
 
-Per the course AI policy, AI tools don't write your code in this course except where an assignment expressly allows it. However, both Colab and VS Code ship with AI code generation **turned on**. Part of your week 8 setup is turning it off for coursework:
+Per the course AI policy, AI tools don't write your code in this course except where an assignment expressly allows it. However, both Colab and VS Code ship with AI code generation **turned on**. Part of your setup is turning it off for coursework:
 
 - **Colab:** gear icon (Settings, top right) → **AI Assistance** → uncheck the code-completion / generative-AI options.
 - **VS Code:** if Copilot or another AI extension is installed or you're signed in with an account that enables it, disable it for your course workspace (Extensions sidebar → Copilot → **Disable (Workspace)**), or turn off inline suggestions in Settings.
