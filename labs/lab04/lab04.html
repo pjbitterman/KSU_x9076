@@ -2282,7 +2282,7 @@ vertical-align: -.125em;
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="co"># points_gdf: a handful of sensor locations; zones_gdf: a handful of zone polygons</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>joined <span class="op">=</span> gpd.sjoin(points_gdf, zones_gdf[[<span class="st">&quot;zone_id&quot;</span>, <span class="st">&quot;zone_name&quot;</span>, <span class="st">&quot;geometry&quot;</span>]],</span>
 <span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                    how<span class="op">=</span><span class="st">&quot;left&quot;</span>, predicate<span class="op">=</span><span class="st">&quot;within&quot;</span>)</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(joined.shape)  <span class="co"># may be &gt;= len(points_gdf): a point on a shared edge can match twice</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(joined.shape)  <span class="co"># may be &gt;= len(points_gdf): a point inside two overlapping polygons matches twice</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>matched <span class="op">=</span> joined[joined[<span class="st">&quot;zone_name&quot;</span>].notna()]</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>per_zone <span class="op">=</span> (</span>

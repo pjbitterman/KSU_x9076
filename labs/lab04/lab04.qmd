@@ -76,7 +76,7 @@ import geopandas as gpd
 # points_gdf: a handful of sensor locations; zones_gdf: a handful of zone polygons
 joined = gpd.sjoin(points_gdf, zones_gdf[["zone_id", "zone_name", "geometry"]],
                     how="left", predicate="within")
-print(joined.shape)  # may be >= len(points_gdf): a point on a shared edge can match twice
+print(joined.shape)  # may be >= len(points_gdf): a point inside two overlapping polygons matches twice
 
 matched = joined[joined["zone_name"].notna()]
 per_zone = (
