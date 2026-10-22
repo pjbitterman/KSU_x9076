@@ -10,7 +10,7 @@ Reproduce both problems from Practicum 1 using only open-source tools: GeoPandas
 
 ## Data
 
-The Practicum 1 inputs are shapefiles. A shapefile is several files, so each one is provided as a single `.zip` that GeoPandas reads directly from its URL, the same `DATA_BASE` pattern every Part 2 notebook uses:
+The Practicum 1 inputs are shapefiles. A shapefile is several files, so each one is provided as a single `.zip` that GeoPandas reads directly from its URL, the same `DATA_BASE` pattern used in every Part 2 notebook:
 
 ```python
 DATA_BASE = "https://raw.githubusercontent.com/pjbitterman/KSU_x9076/main/data/part1"
