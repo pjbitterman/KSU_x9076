@@ -2309,8 +2309,8 @@ vertical-align: -.125em;
 <li><strong>Scalar arithmetic.</strong> Convert the clip to feet and compute relief as height above the clip’s minimum. Report the elevation range in feet and the maximum relief in meters.</li>
 <li><strong>Reclassification.</strong> Classify elevation into three bands with <code>np.digitize()</code>: below 300 m, 300 to 600 m, and 600 m and above. Handle nodata explicitly, as the week 11 session did, and report the share of valid cells in each band.</li>
 <li><strong>Boolean combination.</strong> Build a boolean raster of cells that are high <strong>and</strong> rough: elevation of 600 m or more and a focal range (from Task C) of 30 m or more. Report the cell count, the area in km² (cell count multiplied by the cell area from Task A’s pixel size), and the share of valid cells.</li>
-<li>Plot the three-band elevation raster with a legend naming the bands and a title.</li>
-<li>In two to three sentences: where on the map is the high-and-rough area, and what part of the Blue Ridge does it correspond to?</li>
+<li>Plot the three-class elevation raster from step 2 with a legend naming the classes and a title.</li>
+<li>In two to three sentences, using the class map from step 4 together with the focal-range map from Task C: where in Page County is the high-and-rough area from step 3, and what part of the Blue Ridge does it correspond to?</li>
 </ol>
 <hr>
 </section>

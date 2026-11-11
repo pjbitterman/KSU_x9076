@@ -106,8 +106,8 @@ Raster algebra is a local operation - applied to every cell at once. Apply the b
 1. **Scalar arithmetic.** Convert the clip to feet and compute relief as height above the clip's minimum. Report the elevation range in feet and the maximum relief in meters.
 2. **Reclassification.** Classify elevation into three bands with `np.digitize()`: below 300 m, 300 to 600 m, and 600 m and above. Handle nodata explicitly, as the week 11 session did, and report the share of valid cells in each band.
 3. **Boolean combination.** Build a boolean raster of cells that are high **and** rough: elevation of 600 m or more and a focal range (from Task C) of 30 m or more. Report the cell count, the area in km² (cell count multiplied by the cell area from Task A's pixel size), and the share of valid cells.
-4. Plot the three-band elevation raster with a legend naming the bands and a title.
-5. In two to three sentences: where on the map is the high-and-rough area, and what part of the Blue Ridge does it correspond to?
+4. Plot the three-class elevation raster from step 2 with a legend naming the classes and a title.
+5. In two to three sentences, using the class map from step 4 together with the focal-range map from Task C: where in Page County is the high-and-rough area from step 3, and what part of the Blue Ridge does it correspond to?
 
 ---
 
