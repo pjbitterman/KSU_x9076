@@ -1,0 +1,116 @@
+---
+title: "Lab 7: Is It Clustered?"
+format:
+  pdf:
+    documentclass: article
+  html:
+    embed-resources: true
+---
+
+## Overview
+
+This unit progressed towards the question ***does a county-level variable actually cluster in space, or does it just look that way on a map?*** In lecture, we formalized "nearby" as a spatial weights matrix. The group-based hands-on walkthrough analyzed the spatial autocorrelation of Ohio household income and a variable your team chose. This lab requires you to build that exact pipeline yourself on new geography, the 205 counties and independent cities of the Chesapeake watershed, and then push one step further than either session did: compare what happens when you swap the neighbor rule.
+
+You have `cbw_counties.geojson` (205 counties/independent cities, `EPSG:4269`, identifier columns only) and `cbw_counties_acs.csv` (205 rows of 2019–2023 ACS estimates — `geoid`, `median_hh_income`, `pct_poverty`, `total_population` — joining onto `cbw_counties.geojson` at 100%. Unlike this week's Ohio file, the attributes are provided in a separate table, so you will need to join the table to the geometry).
+
+Download the template notebook, `lab07_template.ipynb`, before you start. It has one markdown header and one seeded code (or prose) cell per task below, so work through the notebook top to bottom.
+
+---
+
+## Setup: the standard Colab cell
+
+```python
+# Run this cell first (takes ~1 minute). Colab already includes geopandas.
+%pip install -q libpysal esda splot mapclassify contextily
+```
+
+**Data:**
+
+```python
+DATA_BASE_P2 = "https://raw.githubusercontent.com/pjbitterman/KSU_x9076/main/data/part2"
+
+# Local path fallback (uncomment if running outside Colab without internet access):
+# DATA_BASE_P2 = "../data/part2"
+```
+
+- `cbw_counties.geojson` — 205 counties/independent cities across the seven-state Chesapeake watershed (DE, DC, MD, NY, PA, VA, WV), with `state_fp`, `county_fp`, `geoid`, `name`, `name_long`, `state`, and geometry — no numeric attribute of its own.
+- `cbw_counties_acs.csv` — the companion attribute table: `geoid` (5-digit, string, zero-padded), `median_hh_income`, `pct_poverty`, `total_population`. Join on `geoid`; every one of the 205 counties matches, with zero missing values afterward — county-level ACS estimates don't suffer the tract-level suppression `cuyahoga_tracts_acs.gpkg` showed in week 12.
+
+Load and join both before Task A:
+
+```python
+import geopandas as gpd
+import pandas as pd
+
+counties = gpd.read_file(f"{DATA_BASE_P2}/cbw_counties.geojson")
+acs = pd.read_csv(f"{DATA_BASE_P2}/cbw_counties_acs.csv", dtype={"geoid": str})
+counties = counties.merge(acs, on="geoid", how="left")
+print(counties.shape, counties["median_hh_income"].isna().sum())
+```
+
+Use this joined `counties` GeoDataFrame — not the unjoined file — for every task below.
+
+---
+
+## Task A: Two neighbor rules, compared (18 points)
+
+`libpysal` will help you build a weights object under several different rules for what "neighbor" means. This week's sessions used Queen contiguity on Ohio's 88 counties, where it produced no islands and one connected network. This file is less tidy. Its boundaries were simplified when it was built, and under Rook contiguity — the stricter rule, requiring a shared border line rather than just a shared corner — Delaware's three counties (`New Castle`/`Kent`/`Sussex`) touch their neighbors only at corners and split off into their own disconnected component. That is a geometry-simplification artifact, not a data error. This task has you build Queen and KNN for the analysis, and Rook once, to see that issue for yourself.
+
+1. Build a Queen contiguity weights object on `counties` (`libpysal.weights.Queen.from_dataframe(counties, use_index=False)`) and a KNN weights object with `k=6` (`libpysal.weights.KNN.from_dataframe(counties, k=6)`).
+2. For each object, report: the number of islands (`.islands`), the number of connected components (`.n_components`, for both; KNN's `k` neighbors per county guarantee zero islands, not a connected network, which is the point of step 3), and the cardinality distribution — minimum, maximum, mean neighbor count (`list(w.cardinalities.values())`), plus, for Queen specifically, a quick histogram or count-by-cardinality breakdown.
+3. Build a Rook contiguity object as well (`libpysal.weights.Rook.from_dataframe(counties, use_index=False)`) and report its islands and `n_components`. Then, in 3-4 sentences, compare Queen and KNN: does KNN's fixed `k=6` produce a noticeably different neighbor *count* distribution than Queen's variable one? And using what you just observed from Rook, explain why "zero islands" on an object doesn't guarantee that it forms one single connected network — a weights object can have no county with *zero* neighbors and still be split into pieces — and what that means for trusting a weights object at a glance.
+
+---
+
+## Task B: Global Moran's I, with an honest significance test (22 points)
+
+In class, the correlation between a variable and its spatial lag was the informal preview of clustering. Global Moran's I is the formal version of that same idea, with a permutation-based significance test attached.
+
+1. Row-standardize your Task A Queen weights object (`w_queen.transform = "r"`). Compute the spatial lag of `median_hh_income` (`libpysal.weights.spatial_lag.lag_spatial`) and report the correlation between income and its lag, as the group exercise did for Ohio.
+2. Set a seed immediately before running the test — `np.random.seed(42)` — then compute `Moran(counties["median_hh_income"].values, w_queen, permutations=999)`.
+3. Print: Moran's I itself, the expected value under spatial randomness (`.EI`, and separately `-1 / (n - 1)` to confirm they match), the permutation-based z-score (`.z_sim`) and p-value (`.p_sim`), and the analytical p-value (`.p_norm`) as a cross-check.
+4. In 4-6 sentences, interpret the result. At minimum: what does the sign and magnitude of `I` say about how household income is arranged across these 205 counties? Why isn't `E[I]` simply `0`? What does `p_sim = 0.001` actually mean, given that it comes from exactly 999 random permutations plus the one real arrangement — is it evidence of *zero* probability the pattern arose by chance, or the smallest p-value that many permutations are capable of producing?
+
+---
+
+## Task C: LISA - which counties, specifically? (23 points)
+
+Global Moran's I answers one question for the whole map. **LISA** (Local Indicators of Spatial Association) asks it once per county: is *this specific county* part of a statistically significant cluster, and if so, which kind?
+
+1. Set the seed again (`np.random.seed(42)`, immediately before the call) and compute `Moran_Local(counties["median_hh_income"].values, w_queen, permutations=999)`.
+2. Determine significance at `p < 0.05` (`lisa.p_sim < 0.05`) and report how many of the 205 counties clear that bar.
+3. Map the quadrant codes to labels (`{1: "HH", 2: "LH", 3: "LL", 4: "HL"}`) and report the breakdown of significant counties by quadrant (`collections.Counter`).
+4. Build the LISA cluster map (`splot.esda.lisa_cluster(lisa, counties, p=0.05)`), with a title stating the weights rule, permutation count, and significance threshold used.
+5. **Name the clusters.** Print the significant HH ("hot spot") counties sorted by income (descending) and the significant LL ("cold spot") counties sorted by income (ascending), at least the top 5-8 of each. In 3-5 sentences, describe the geography those two lists show — what region is the hot spot, what region is the cold spot, and does that match what you'd expect knowing this file spans the DC/Baltimore/Philadelphia corridor and rural Appalachia?
+
+---
+
+## Task D: What did changing the neighbor rule change? (8 points)
+
+Task A constructed two legitimate (but different), definitions of "neighbor" — Queen contiguity and KNN. Tasks B and C used Queen. This task asks you to rerun the same analysis with the other weights object and report what changed.
+
+**In 200-300 words:** row-standardize your Task A KNN object, then recompute global Moran's I and/or the LISA significance count and quadrant breakdown on `median_hh_income` using KNN instead of Queen (same seeding discipline as Tasks B/C). Report the specific numbers that changed — does global `I` changed much? Does the count of significant counties go up, down, or stay about the same? Do any specific counties flip from "significant" to "not significant" (or the reverse) between the two weights choices? Then explain *why*, grounded in how KNN and Queen structure neighborhoods. Close with what this comparison tells you about trusting a single Moran's I number or a single LISA map without knowing which weights rule produced it.
+
+---
+
+## Deliverables and submission
+
+Submit through Canvas:
+
+1. Your completed template notebook, a link to the notebook on GitHub or Colab. One file, runnable top to bottom.
+
+
+## Point breakdown
+
+| Component | Points |
+|---|---|
+| Task A: Two neighbor rules, compared | 18 |
+| Task B: Global Moran's I | 22 |
+| Task C: LISA cluster map | 23 |
+| Task D: What did changing the neighbor rule change? | 8 |
+| Style and naming | 4 |
+| **Total** | **75** |
+
+"Style and naming" covers `snake_case` variable names, f-strings for all formatted output, a seed set immediately before every permutation-based call (not once at the top and forgotten), and a notebook that runs top to bottom without manual intervention.
+
+Late work follows the course late policy: unless otherwise noted, submissions lose 20% of the possible points per day late.
